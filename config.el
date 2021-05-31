@@ -74,6 +74,10 @@
 
 ;; ----------------------------------------------------------------------------
 
+;; enable breadcrumb and disable spell check
+(after! lsp-mode
+  (setq lsp-headerline-breadcrumb-enable t)
+  (setq lsp-headerline-breadcrumb-enable-diagnostics nil))
 
 ;; ccls
 (after! ccls
