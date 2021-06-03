@@ -118,4 +118,10 @@
     :desc "Switch to window 8" :n "8" #'winum-select-window-8
     :desc "Switch to window 9" :n "9" #'winum-select-window-9))
 
+;; buffer switch
+(map!
+ (:leader
+  :desc "Next buffer" "l" #'next-buffer
+  :desc "Previous buffer" "k" #'previous-buffer
+  ))
 ;; -----------------------------------------------------------------------------------------
