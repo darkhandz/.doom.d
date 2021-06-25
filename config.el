@@ -84,10 +84,6 @@
   (setq ccls-initialization-options '(:index (:comments 2) :completion (:detailedLabel t)))
   (set-lsp-priority! 'ccls 2)) ; optional as ccls is the default in Doom
 
-;; temp fix, lookup/references can't jump to selected item
-(add-hook! lsp-mode
-  (defalias '+lookup/references 'lsp-find-references))
-
 ;; ------------------------------------------ winnum --------------------------------------
 ;; winnum
 (use-package! winum
@@ -124,4 +120,15 @@
   :desc "Next buffer" "l" #'next-buffer
   :desc "Previous buffer" "k" #'previous-buffer
   ))
+
+
+;; Hide ^M
+(defun remove-dos-eol ()
+  "Do not show ^M in files containing mixed UNIX and DOS line endings."
+  (interactive)
+  (setq buffer-display-table (make-display-table))
+  (aset buffer-display-table ?\^M []))
+
+(add-hook 'text-mode-hook 'remove-dos-eol)
+(add-hook 'c-mode-common-hook 'remove-dos-eol)
 ;; -----------------------------------------------------------------------------------------
