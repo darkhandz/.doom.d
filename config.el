@@ -121,6 +121,13 @@
   :desc "Previous buffer" "k" #'previous-buffer
   ))
 
+;; set the best font height for different screen resolution: 2K - 100, 4K - 180
+(map! :leader
+      :desc "set font size to adapt 4K"
+      "j 4" #'(lambda () (interactive) (set-face-attribute 'default nil :height 180)))
+(map! :leader
+      :desc "set font size to adapt 2K"
+      "j 2" #'(lambda () (interactive) (set-face-attribute 'default nil :height 100)))
 
 ;; Hide ^M
 (defun remove-dos-eol ()
