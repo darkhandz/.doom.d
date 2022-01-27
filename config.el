@@ -74,10 +74,14 @@
 
 ;; ----------------------------------------------------------------------------
 
-;; enable breadcrumb and disable spell check
+;; lsp
 (after! lsp-mode
+  ;; enable breadcrumb and disable spell check
   (setq lsp-headerline-breadcrumb-enable t)
-  (setq lsp-headerline-breadcrumb-enable-diagnostics nil))
+  (setq lsp-headerline-breadcrumb-enable-diagnostics nil)
+  ;; disable lsp code lense (SPC c l T l)
+  (setq lsp-lens-enable nil)
+  (setq lsp-ui-doc-show-with-cursor nil))
 
 ;; ccls
 (after! ccls
@@ -88,10 +92,8 @@
 ;; winnum
 (use-package! winum
   :init
-  (setq-default
-   winum-scope 'frame-local)
-  :config
-  )
+  (setq-default winum-scope 'frame-local)
+  :config)
 (winum-mode)
 
 ;; Make Treemacs accessible as Window #0
