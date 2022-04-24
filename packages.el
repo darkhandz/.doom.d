@@ -51,3 +51,4 @@
 
 
 (package! winum)
+(package! rime)
