@@ -10,6 +10,8 @@
       user-mail-address "darkhandz0@gmail.com")
 
 (setq doom-font (font-spec :family "Fira Code Retina" :size 14))
+(setq doom-unicode-font (font-spec :family "WenQuanYi Zen Hei Mono"))
+
 (setq confirm-kill-emacs nil)
 ;; Doom exposes five (optional) variables for controlling fonts in Doom. Here
 ;; are the three important ones:
@@ -27,7 +29,7 @@
 ;; There are two ways to load a theme. Both assume the theme is installed and
 ;; available. You can either set `doom-theme' or manually load a theme with the
 ;; `load-theme' function. This is the default:
-(setq doom-theme 'doom-one)
+(setq doom-theme 'doom-one-light)
 
 ;; If you use `org' and don't want your org files in the default location below,
 ;; change `org-directory'. It must be set before org loads!
@@ -53,6 +55,16 @@
 ;; You can also try 'gd' (or 'C-c c d') to jump to their definition and see how
 ;; they are implemented.
 
+;; ----------------------------- input method----------------------------------
+(setq default-input-method "rime"
+      rime-show-candidate 'posframe)
+(setq rime-user-data-dir "~/.doom.d/rime")
+(setq rime-posframe-properties
+    (list :font "WenQuanYi Micro Hei Mono-14"
+       :background-color "#333333"
+       :foreground-color "#dcdccc"
+       :internal-border-width 10))
+;; ------------------------------ vim sneak -----------------------------------
 ;; avy, any char
 (map! :leader
       :desc "evil-avy-goto-char-timer"
