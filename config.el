@@ -9,7 +9,8 @@
 (setq user-full-name "darkhandz"
       user-mail-address "darkhandz0@gmail.com")
 
-(setq doom-font (font-spec :family "Fira Code Retina" :size 14))
+;; (setq doom-font (font-spec :family "Fira Code Retina" :size 14))
+(setq doom-font (font-spec :family "FiraCode NF" :size 16))
 (setq doom-unicode-font (font-spec :family "WenQuanYi Zen Hei Mono"))
 
 (setq confirm-kill-emacs nil)
@@ -37,7 +38,7 @@
 
 ;; This determines the style of line numbers in effect. If set to `nil', line
 ;; numbers are disabled. For relative line numbers, set this to `relative'.
-(setq display-line-numbers-type t)
+(setq display-line-numbers-type 'relative)
 ;; Here are some additional functions/macros that could help you configure Doom:
 ;;
 ;; - `load!' for loading external *.el files relative to this one
@@ -65,10 +66,10 @@
        :foreground-color "#dcdccc"
        :internal-border-width 10))
 ;; ------------------------------ vim sneak -----------------------------------
-;; avy, any char
+;; avy, 2 char motion
 (map! :leader
-      :desc "evil-avy-goto-char-timer"
-      "j j" #'evil-avy-goto-char-timer)
+      :desc "evil-avy-goto-char-2"
+      "j j" #'evil-avy-goto-char-2)
 
 (add-hook 'c-mode-hook (lambda () (c-toggle-comment-style -1)))
 
@@ -92,13 +93,14 @@
   (setq lsp-headerline-breadcrumb-enable t)
   (setq lsp-headerline-breadcrumb-enable-diagnostics nil)
   ;; disable lsp code lense (SPC c l T l)
-  (setq lsp-lens-enable nil)
+  ;; (setq lsp-lens-enable nil)
   (setq lsp-ui-doc-show-with-cursor nil))
 
 ;; ccls
 (after! ccls
   (setq ccls-initialization-options '(:index (:comments 2) :completion (:detailedLabel t)))
-  (set-lsp-priority! 'ccls 2)) ; optional as ccls is the default in Doom
+  ;; optional as ccls is the default in Doom, if you want to use clangd, let the priority smaller than clangd
+  (set-lsp-priority! 'ccls -2))
 
 ;; ------------------------------------------ winnum --------------------------------------
 ;; winnum
@@ -128,12 +130,36 @@
     :desc "Switch to window 8" :n "8" #'winum-select-window-8
     :desc "Switch to window 9" :n "9" #'winum-select-window-9))
 
+;; --------------------------------------------------------------------------------
+(add-hook 'prog-mode-hook 'highlight-indent-guides-mode)
+(use-package! highlight-indent-guides
+  :init
+  (setq-default highlight-indent-guides-method 'character)
+  (setq-default highlight-indent-guides-responsive 'top))
+
+;; --------------------------------------------------------------------------------
 ;; buffer switch
 (map!
  (:leader
   :desc "Next buffer" "l" #'next-buffer
   :desc "Previous buffer" "k" #'previous-buffer
   ))
+
+
+;; consult
+;; (use-package! consult
+;; :config
+;; (consult-customize
+;;    consult-ripgrep consult-git-grep consult-grep
+;;    consult-bookmark consult-recent-file
+;;    +default/search-project +default/search-other-project
+;;    +default/search-project-for-symbol-at-point
+;;    +default/search-cwd +default/search-other-cwd
+;;    +default/search-notes-for-symbol-at-point
+;;    +default/search-emacsd
+;;    consult--source-recent-file consult--source-project-recent-file consult--source-bookmark
+;;    :preview-key '(:debounce 0.5 any)))
+
 
 ;; set the best font height for different screen resolution: 2K - 100, 4K - 180
 (map! :leader
