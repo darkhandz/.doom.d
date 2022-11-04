@@ -52,4 +52,4 @@
 
 (package! winum)
 (package! rime)
-(package! highlight-indent-guides)
+;; (package! highlight-indent-guides)
