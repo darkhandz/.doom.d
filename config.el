@@ -73,6 +73,9 @@
 
 (add-hook 'c-mode-hook (lambda () (c-toggle-comment-style -1)))
 
+;; ------------------------ whitespace-mode has bugs --------------------------
+;; disbale whitespace-mode
+;; (advice-add #'doom-highlight-non-default-indentation-h :override #'ignore)
 
 ;; ------------------------ make _ as part of word ----------------------------
 ;; For c
