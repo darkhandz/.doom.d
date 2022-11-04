@@ -131,11 +131,11 @@
     :desc "Switch to window 9" :n "9" #'winum-select-window-9))
 
 ;; --------------------------------------------------------------------------------
-(add-hook 'prog-mode-hook 'highlight-indent-guides-mode)
-(use-package! highlight-indent-guides
-  :init
-  (setq-default highlight-indent-guides-method 'character)
-  (setq-default highlight-indent-guides-responsive 'top))
+;; (add-hook 'prog-mode-hook 'highlight-indent-guides-mode)
+;; (use-package! highlight-indent-guides
+;;   :init
+;;   (setq-default highlight-indent-guides-method 'character)
+;;   (setq-default highlight-indent-guides-responsive 'top))
 
 ;; --------------------------------------------------------------------------------
 ;; buffer switch
