@@ -178,4 +178,35 @@
 
 (add-hook 'text-mode-hook 'remove-dos-eol)
 (add-hook 'c-mode-common-hook 'remove-dos-eol)
+
+
+(use-package evil
+  :ensure t
+  :config
+  (evil-mode 1)
+  ;; (key-chord-define evil-insert-state-map "jj" 'evil-normal-state)
+  (defun delete-selection-and-paste ()
+    (interactive)
+    (delete-region (region-beginning) (region-end))
+    (yank))
+  (evil-define-operator evil-change-line-no-yank (beg end type register yank-handler)
+    "Change to end of line without yanking."
+    :motion evil-end-of-line
+    (interactive "<R><x><y>")
+    (evil-change beg end type ?_ yank-handler #'evil-delete-line))
+  (evil-define-operator evil-change-no-yank (beg end type register yank-handler)
+    "Change without yanking."
+    (evil-change beg end type ?_ yank-handler))
+  (evil-define-operator evil-change-whole-line-no-yank (beg end type register yank-handler)
+    :motion evil-line
+    (interactive "<R><x>")
+    (evil-change beg end type ?_ yank-handler #'evil-delete-whole-line))
+
+  (define-key evil-visual-state-map (kbd "p") 'delete-selection-and-paste)
+  (define-key evil-normal-state-map (kbd "C") 'evil-change-line-no-yank)
+  (define-key evil-normal-state-map (kbd "c") 'evil-change-no-yank)
+  (define-key evil-visual-state-map (kbd "c") 'evil-change-no-yank)
+  (define-key evil-visual-state-map (kbd "S") 'evil-change-whole-line-no-yank)
+  (modify-syntax-entry ?_ "w"))
+
 ;; -----------------------------------------------------------------------------------------
