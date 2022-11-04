@@ -93,7 +93,7 @@
   (setq lsp-headerline-breadcrumb-enable t)
   (setq lsp-headerline-breadcrumb-enable-diagnostics nil)
   ;; disable lsp code lense (SPC c l T l)
-  ;; (setq lsp-lens-enable nil)
+  (setq lsp-lens-enable nil)
   (setq lsp-ui-doc-show-with-cursor nil))
 
 ;; ccls
