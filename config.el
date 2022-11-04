@@ -13,7 +13,7 @@
 (setq doom-font (font-spec :family "FiraCode NF" :size 16))
 (setq doom-unicode-font (font-spec :family "WenQuanYi Zen Hei Mono"))
 
-(setq confirm-kill-emacs nil)
+(setq confirm-kill-emacs t)
 ;; Doom exposes five (optional) variables for controlling fonts in Doom. Here
 ;; are the three important ones:
 ;;
