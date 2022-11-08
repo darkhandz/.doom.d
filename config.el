@@ -75,7 +75,16 @@
 
 ;; ------------------------ whitespace-mode has bugs --------------------------
 ;; disbale whitespace-mode
-;; (advice-add #'doom-highlight-non-default-indentation-h :override #'ignore)
+(advice-add #'doom-highlight-non-default-indentation-h :override #'ignore)
+
+;; ------------------------------ whitespace4r --------------------------------
+(progn
+  (setq show-trailing-whitespace nil)
+  (setq whitespace4r-style '(tabs hspaces zwspaces trailing))
+  (setq whitespace4r-display-mappings `((space-mark      . [?·])
+                                        (hard-space-mark . [?¤])
+                                        (zero-width-space-mark . [?┆])
+                                        (tab-mark        . [?— ?⟶]))))
 
 ;; ------------------------ make _ as part of word ----------------------------
 ;; For c
