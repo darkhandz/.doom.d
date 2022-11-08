@@ -7,3 +7,5 @@ patch:
       - { when: has_menu, accept: ".", send: Page_Down }
   menu:
     page_size: 6
+  schema_list:
+    - schema: clover
