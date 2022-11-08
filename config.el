@@ -103,7 +103,7 @@
 (after! ccls
   (setq ccls-initialization-options '(:index (:comments 2) :completion (:detailedLabel t)))
   ;; optional as ccls is the default in Doom, if you want to use clangd, let the priority smaller than clangd
-  (set-lsp-priority! 'ccls -2))
+  (set-lsp-priority! 'ccls 2))
 
 ;; ------------------------------------------ winnum --------------------------------------
 ;; winnum
@@ -183,6 +183,7 @@
 (add-hook 'c-mode-common-hook 'remove-dos-eol)
 
 
+;; remap p/c/s without yank
 (use-package evil
   :ensure t
   :config
