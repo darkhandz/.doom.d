@@ -57,3 +57,5 @@
 (package! whitespace4r
  :recipe (:host github :repo "twlz0ne/whitespace4r.el"
           :files ("whitespace4r.el")))
+
+(package! command-log-mode)
