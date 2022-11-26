@@ -197,7 +197,9 @@
   :ensure t
   :config
   (evil-mode 1)
-  ;; (key-chord-define evil-insert-state-map "jj" 'evil-normal-state)
+  ;; C-h/C-d to delete char on insert state
+  (define-key evil-insert-state-map (kbd "C-h") 'evil-delete-backward-char-and-join)
+  (define-key evil-insert-state-map (kbd "C-d") 'evil-delete-char)
   (defun delete-selection-and-paste ()
     (interactive)
     (delete-region (region-beginning) (region-end))
