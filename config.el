@@ -84,7 +84,8 @@
   (setq whitespace4r-display-mappings `((space-mark      . [?·])
                                         (hard-space-mark . [?¤])
                                         (zero-width-space-mark . [?┆])
-                                        (tab-mark        . [?— ?⟶]))))
+                                        (tab-mark        . [?- ?⟶]))))
+(add-hook 'prog-mode-hook (lambda () (whitespace4r-mode 1)))
 
 ;; ------------------------ make _ as part of word ----------------------------
 ;; For c
@@ -143,13 +144,6 @@
     :desc "Switch to window 9" :n "9" #'winum-select-window-9))
 
 ;; --------------------------------------------------------------------------------
-;; (add-hook 'prog-mode-hook 'highlight-indent-guides-mode)
-;; (use-package! highlight-indent-guides
-;;   :init
-;;   (setq-default highlight-indent-guides-method 'character)
-;;   (setq-default highlight-indent-guides-responsive 'top))
-
-;; --------------------------------------------------------------------------------
 ;; buffer switch
 (map!
  (:leader
@@ -197,6 +191,10 @@
   :ensure t
   :config
   (evil-mode 1)
+  ;; avy is more efficient than evil-snipe-s/S
+  (evil-define-key '(normal visual) evil-snipe-local-mode-map
+    (kbd "s") 'evil-avy-goto-char-in-line
+    (kbd "S") 'evil-avy-goto-char)
   ;; C-h/C-d to delete char on insert state
   (define-key evil-insert-state-map (kbd "C-h") 'evil-delete-backward-char-and-join)
   (define-key evil-insert-state-map (kbd "C-d") 'evil-delete-char)
