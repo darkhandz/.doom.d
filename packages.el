@@ -52,7 +52,6 @@
 
 (package! winum)
 (package! rime)
-;; (package! highlight-indent-guides)
 
 (package! whitespace4r
  :recipe (:host github :repo "twlz0ne/whitespace4r.el"
