@@ -11,7 +11,7 @@
 
 ;; (setq doom-font (font-spec :family "Fira Code Retina" :size 14))
 (setq doom-font (font-spec :family "Maple Mono SC NF" :size 17 :weight 'bold))
-(setq doom-unicode-font (font-spec :family "WenQuanYi Zen Hei Mono"))
+(setq doom-unicode-font (font-spec :family "Maple Mono SC NF"))
 
 (setq confirm-kill-emacs t)
 ;; Doom exposes five (optional) variables for controlling fonts in Doom. Here
