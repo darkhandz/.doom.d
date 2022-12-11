@@ -58,3 +58,5 @@
           :files ("whitespace4r.el")))
 
 (package! command-log-mode)
+
+(package! citre)
