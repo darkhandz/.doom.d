@@ -201,6 +201,8 @@
   (evil-define-key '(normal visual) evil-snipe-local-mode-map
     (kbd "s") 'evil-avy-goto-char-in-line
     (kbd "S") 'evil-avy-goto-char)
+  (define-key evil-visual-state-map (kbd "S") 'evil-avy-goto-char-in-line)
+  (define-key evil-normal-state-map (kbd "S") 'evil-avy-goto-char)
   ;; C-h/C-d to delete char on insert state
   (define-key evil-insert-state-map (kbd "C-h") 'evil-delete-backward-char-and-join)
   (define-key evil-insert-state-map (kbd "C-d") 'evil-delete-char)
