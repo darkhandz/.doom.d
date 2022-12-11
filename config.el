@@ -56,6 +56,10 @@
 ;; You can also try 'gd' (or 'C-c c d') to jump to their definition and see how
 ;; they are implemented.
 
+
+(add-hook 'c-mode-hook (lambda () (c-toggle-comment-style -1)))
+
+
 ;; ----------------------------- input method----------------------------------
 (setq default-input-method "rime"
       rime-show-candidate 'posframe)
@@ -70,8 +74,9 @@
 (map! :leader
       :desc "evil-avy-goto-char-2"
       "j j" #'evil-avy-goto-char-2)
+;; make avy works across all visible windows
+(setq avy-all-windows t)
 
-(add-hook 'c-mode-hook (lambda () (c-toggle-comment-style -1)))
 
 ;; ------------------------ whitespace-mode has bugs --------------------------
 ;; disbale whitespace-mode
@@ -186,6 +191,7 @@
 (add-hook 'c-mode-common-hook 'remove-dos-eol)
 
 
+;; -----------------------------------------------------------------------------------------
 ;; remap p/c/s without yank
 (use-package evil
   :ensure t
