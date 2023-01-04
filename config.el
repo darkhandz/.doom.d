@@ -269,6 +269,12 @@
   (remove-hook 'find-file-hook #'citre-auto-enable-citre-mode))
 
 
+(defun upd-compile-json()
+  "update compile_commands.json"
+  (interactive)
+  (progn
+    (shell-command-to-string "cd $(git rev-parse --show-toplevel) && cd $(fd '\.cbp' | awk -F/ '{print $2}') && make OS=X BUILD_DIR=objs-linux -Bnwk > compile.txt && if [ ! -f vs_search_board_cfg.py ]; then python vs_search_board_cfg.py; fi; python gen_compile_json.py; rm -f compile.txt")
+    ))
 
 
 ;; -----------------------------------------------------------------------------------------
