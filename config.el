@@ -264,9 +264,9 @@
    ;; By default, when you open any file, and a tags file can be found for it,
    ;; `citre-mode' is automatically enabled.  If you only want this to work for
    ;; certain modes (like `prog-mode'), set it like this.
-   citre-auto-enable-citre-mode-modes '(prog-mode)))
-
-
+   ;;citre-auto-enable-citre-mode-modes '(prog-mode)
+   )
+  (remove-hook 'find-file-hook #'citre-auto-enable-citre-mode))
 
 
 
