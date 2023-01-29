@@ -273,7 +273,12 @@
   "update compile_commands.json"
   (interactive)
   (progn
-    (shell-command-to-string "cd $(git rev-parse --show-toplevel) && cd $(fd '\.cbp' | awk -F/ '{print $2}') && make OS=X BUILD_DIR=objs-linux -Bnwk > compile.txt && if [ ! -f vs_search_board_cfg.py ]; then python vs_search_board_cfg.py; fi; python gen_compile_json.py; rm -f compile.txt")
+    (shell-command-to-string (concat "cd $(git rev-parse --show-toplevel) && "
+                                      "cd $(fd '\.cbp' | awk -F/ '{print $2}') && "
+                                      "if [ -f vs_search_board_cfg.py ]; then python vs_search_board_cfg.py; fi; "
+                                      "make OS=X BUILD_DIR=objs-linux -Bnwk > compile.txt && python gen_compile_json.py && rm -f compile.txt;"))
+    (sit-for 0 200)
+    (lsp-restart-workspace)
     ))
 
 
