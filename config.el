@@ -89,7 +89,7 @@
                                         (hard-space-mark . [?¤])
                                         (zero-width-space-mark . [?┆])
                                         (tab-mark        . [?- ?⟶]))))
-(add-hook 'prog-mode-hook (lambda () (whitespace4r-mode 1)))
+;; (add-hook 'prog-mode-hook (lambda () (whitespace4r-mode 1)))
 
 ;; ------------------------ make _ as part of word ----------------------------
 ;; For c
@@ -277,4 +277,10 @@
     ))
 
 
+(use-package! tree-sitter
+  :hook (prog-mode . turn-on-tree-sitter-mode)
+  :hook (tree-sitter-after-on . tree-sitter-hl-mode) ;; syntax highlight
+  :hook (tree-sitter-after-on . (lambda() (setq lsp-enable-symbol-highlighting nil))) ;; disable lsp symbol highlight
+  :hook (tree-sitter-after-on . ts-fold-mode)) ;; fold by tree-sitter
+  ;; :hook (tree-sitter-after-on . ts-fold-indicators-mode))
 ;; -----------------------------------------------------------------------------------------
