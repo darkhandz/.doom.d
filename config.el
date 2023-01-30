@@ -64,7 +64,7 @@
       rime-show-candidate 'posframe)
 (setq rime-user-data-dir "~/.doom.d/rime")
 (setq rime-posframe-properties
-    (list :font "WenQuanYi Micro Hei Mono-14"
+    (list :font "Maple Mono SC NF"
        :background-color "#333333"
        :foreground-color "#dcdccc"
        :internal-border-width 10))
