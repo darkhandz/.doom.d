@@ -277,7 +277,6 @@
                                       "cd $(fd '\.cbp' | awk -F/ '{print $2}') && "
                                       "if [ -f vs_search_board_cfg.py ]; then python vs_search_board_cfg.py; fi; "
                                       "make OS=X BUILD_DIR=objs-linux -Bnwk > compile.txt && python gen_compile_json.py && rm -f compile.txt;"))
-    (sit-for 0 200)
     (lsp-restart-workspace)
     ))
 
@@ -289,3 +288,46 @@
   :hook (tree-sitter-after-on . ts-fold-mode)) ;; fold by tree-sitter
   ;; :hook (tree-sitter-after-on . ts-fold-indicators-mode))
 ;; -----------------------------------------------------------------------------------------
+
+
+;; ------------------------------ vterm for make compile -------------------------------
+(defun dark/vterm-run-cmd (arg) "open vterm window and run cmd"
+    (interactive)
+    (let* (
+          (buffer-name
+            (format "*doom:vterm-popup:%s*"
+                    (if (bound-and-true-p persp-mode)
+                        (safe-persp-name (get-current-persp))
+                      "main")))
+
+                (buffer (get-buffer buffer-name))
+                (window (get-buffer-window buffer-name)))
+        (unless (and (buffer-live-p buffer) (window-live-p window))
+                (+vterm/toggle nil))
+        (with-current-buffer buffer-name
+                (let ((inhibit-read-only t))
+                (vterm-send-string arg)))
+    )
+)
+(defun dark/project-build() "switch board and make -j"
+    (interactive)
+    (dark/vterm-run-cmd "make -j\n"))
+(defun dark/project-clean() "make clean"
+    (interactive)
+    (dark/vterm-run-cmd "make clean\n"))
+(defun dark/project-rebuild() "clean build"
+    (interactive)
+    (dark/vterm-run-cmd "make clean && if [ -f vs_search_board_cfg.py ]; then python vs_search_board_cfg.py; fi; make -j\n"))
+(defun dark/hide-vterm() "Hide vterm window"
+    (interactive)
+    (+vterm/toggle nil))
+
+(global-set-key (kbd "<f12>") 'dark/project-build)
+(global-set-key (kbd "<f11>") 'dark/hide-vterm)
+(global-set-key (kbd "<f10>") 'dark/project-clean)
+(global-set-key (kbd "<f9>")  'dark/project-rebuild)
+(map! :after vterm :map vterm-mode-map :ni "<f12>" #'dark/project-build)
+(map! :after vterm :map vterm-mode-map :ni "<f11>" #'dark/hide-vterm)
+(map! :after vterm :map vterm-mode-map :ni "<f10>" #'dark/project-clean)
+(map! :after vterm :map vterm-mode-map :ni "<f9>"  #'dark/project-rebuild)
+
