@@ -337,3 +337,14 @@
 (map! :after vterm :map vterm-mode-map :ni "<f10>" #'dark/project-clean)
 (map! :after vterm :map vterm-mode-map :ni "<f9>"  #'dark/project-rebuild)
 
+;; disable <M-num> in vterm (M-num is use for switch workspace)
+(map! :after vterm :map vterm-mode-map :ni "\M-1" nil)
+(map! :after vterm :map vterm-mode-map :ni "\M-2" nil)
+(map! :after vterm :map vterm-mode-map :ni "\M-3" nil)
+(map! :after vterm :map vterm-mode-map :ni "\M-4" nil)
+(map! :after vterm :map vterm-mode-map :ni "\M-5" nil)
+(map! :after vterm :map vterm-mode-map :ni "\M-6" nil)
+(map! :after vterm :map vterm-mode-map :ni "\M-7" nil)
+(map! :after vterm :map vterm-mode-map :ni "\M-8" nil)
+(map! :after vterm :map vterm-mode-map :ni "\M-9" nil)
+
