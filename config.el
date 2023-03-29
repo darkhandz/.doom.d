@@ -56,6 +56,15 @@
 ;; they are implemented.
 
 
+;; ----------------------------- mouse scroll --------------------------------
+;; scroll one line at a time (less “jumpy” than defaults)
+(setq mouse-wheel-scroll-amount '(5 ((shift) . 8))) ;; 5 lines / 8 columns at a time,
+(setq mouse-wheel-progressive-speed nil) ;; don't accelerate scrolling
+(setq mouse-wheel-follow-mouse 't) ;; scroll window under mouse
+;; (setq scroll-step 1) ;; keyboard scroll 5 lines at a time
+
+;; -------------------------------- comment -----------------------------------
+;; comment mode, positive: block, negative: line
 (add-hook 'c-mode-hook (lambda () (c-toggle-comment-style -1)))
 
 
