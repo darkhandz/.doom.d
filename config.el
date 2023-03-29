@@ -161,8 +161,7 @@
 (map!
  (:leader
   :desc "Next buffer" "l" #'next-buffer
-  :desc "Previous buffer" "k" #'previous-buffer
-  ))
+  :desc "Previous buffer" "k" #'previous-buffer))
 
 
 ;; consult
@@ -283,11 +282,10 @@
   (interactive)
   (progn
     (shell-command-to-string (concat "cd $(git rev-parse --show-toplevel) && "
-                                      "cd $(fd '\.cbp' | awk -F/ '{print $2}') && "
+                                      "cd $(fd '\.cbp' | awk -F/ '{print $1}') && "
                                       "if [ -f vs_search_board_cfg.py ]; then python vs_search_board_cfg.py; fi; "
                                       "make OS=X BUILD_DIR=objs-linux -Bnwk > compile.txt && python gen_compile_json.py && rm -f compile.txt;"))
-    (lsp-restart-workspace)
-    ))
+    (lsp-restart-workspace)))
 
 
 (use-package! tree-sitter
@@ -295,29 +293,28 @@
   :hook (tree-sitter-after-on . tree-sitter-hl-mode) ;; syntax highlight
   :hook (tree-sitter-after-on . (lambda() (setq lsp-enable-symbol-highlighting nil))) ;; disable lsp symbol highlight
   :hook (tree-sitter-after-on . ts-fold-mode)) ;; fold by tree-sitter
-  ;; :hook (tree-sitter-after-on . ts-fold-indicators-mode))
+;; :hook (tree-sitter-after-on . ts-fold-indicators-mode))
 ;; -----------------------------------------------------------------------------------------
 
 
 ;; ------------------------------ vterm for make compile -------------------------------
 (defun dark/vterm-run-cmd (arg) "open vterm window and run cmd"
-    (interactive)
-    (let* (
-          (buffer-name
-            (format "*doom:vterm-popup:%s*"
-                    (if (bound-and-true-p persp-mode)
-                        (safe-persp-name (get-current-persp))
-                      "main")))
+       (interactive)
+       (let* (
+              (buffer-name
+               (format "*doom:vterm-popup:%s*"
+                       (if (bound-and-true-p persp-mode)
+                           (safe-persp-name (get-current-persp))
+                         "main")))
 
-                (buffer (get-buffer buffer-name))
-                (window (get-buffer-window buffer-name)))
-        (unless (and (buffer-live-p buffer) (window-live-p window))
-                (+vterm/toggle nil))
-        (with-current-buffer buffer-name
-                (let ((inhibit-read-only t))
-                (vterm-send-string arg)))
-    )
-)
+              (buffer (get-buffer buffer-name))
+              (window (get-buffer-window buffer-name)))
+         (unless (and (buffer-live-p buffer) (window-live-p window))
+           (+vterm/toggle nil))
+         (with-current-buffer buffer-name
+           (let ((inhibit-read-only t))
+             (vterm-send-string arg)))))
+
 (defun dark/project-build() "switch board and make -j"
     (interactive)
     (dark/vterm-run-cmd "make -j\n"))
