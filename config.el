@@ -71,7 +71,7 @@
 ;; ----------------------------- input method----------------------------------
 (setq default-input-method "rime"
       rime-show-candidate 'posframe)
-(setq rime-user-data-dir "~/.doom.d/rime")
+(setq rime-user-data-dir "~/.config/fcitx/rime")
 (setq rime-posframe-properties
     (list :font "Maple Mono SC NF"
        :background-color "#333333"
