@@ -323,7 +323,8 @@
     (dark/vterm-run-cmd "make clean\n"))
 (defun dark/project-rebuild() "clean build"
     (interactive)
-    (dark/vterm-run-cmd "make clean && if [ -f vs_search_board_cfg.py ]; then python vs_search_board_cfg.py; fi; make -j\n"))
+    (dark/vterm-run-cmd (concat "cd $(git rev-parse --show-toplevel) && cd $(fd 'Makefile' | xargs -n1 dirname ) && ulimit -n 8192 && "
+                                "make clean && if [ -f vs_search_board_cfg.py ]; then python vs_search_board_cfg.py; fi; make -j\n")))
 (defun dark/hide-vterm() "Hide vterm window"
     (interactive)
     (+vterm/toggle nil))
