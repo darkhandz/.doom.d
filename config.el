@@ -355,11 +355,3 @@
 (map! :after vterm :map vterm-mode-map :ni "\M-8" nil)
 (map! :after vterm :map vterm-mode-map :ni "\M-9" nil)
 
-
-(load-theme 'doom-one-light t t)     ;;加载浅色主题，但不启用。
-(load-theme 'doom-one t t)	;;加载深色主题，但不启用。
-;;早上启用浅色主题， 每24小时重复一次。
-(run-at-time "07:00" (* 60 60 24) (lambda () (enable-theme 'doom-one-light)))
-;;晚上启用深色主题， 每24小时重复一次。
-(run-at-time "18:30" (* 60 60 24) (lambda () (enable-theme 'doom-one)))
-
