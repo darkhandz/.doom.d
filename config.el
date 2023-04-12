@@ -142,6 +142,12 @@
           (delete (regexp-quote (format "%sFramebuffer-" treemacs--buffer-name-prefix))
                   winum-ignored-buffers-regexp)))
 
+
+;; magit show detail datetime instead of relative time
+(after! magit
+  (setq magit-log-margin '(t "%Y-%m-%d %H:%M " magit-log-margin-width t 18)))
+
+
 ;; SPC n to switch to winum-numbered window n
 (map!
  (:leader
