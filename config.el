@@ -288,7 +288,7 @@
   (interactive)
   (progn
     (shell-command-to-string (concat "cd $(git rev-parse --show-toplevel) && "
-                                      "cd $(fd '\.cbp' | awk -F/ '{print $1}') && "
+                                      "cd $(fd 'Makefile' | head -n1 | xargs -n1 dirname ) && "
                                       "if [ -f vs_search_board_cfg.py ]; then python vs_search_board_cfg.py; fi; "
                                       "make OS=X BUILD_DIR=objs-linux -Bnwk > compile.txt && python gen_compile_json.py && rm -f compile.txt;"))
     (lsp-restart-workspace)))
@@ -329,7 +329,7 @@
     (dark/vterm-run-cmd "make clean\n"))
 (defun dark/project-rebuild() "clean build"
     (interactive)
-    (dark/vterm-run-cmd (concat "cd $(git rev-parse --show-toplevel) && cd $(fd 'Makefile' | xargs -n1 dirname ) && ulimit -n 8192 && "
+    (dark/vterm-run-cmd (concat "cd $(git rev-parse --show-toplevel) && cd $(fd 'Makefile' | head -n1 | xargs -n1 dirname ) && ulimit -n 8192 && "
                                 "make clean && if [ -f vs_search_board_cfg.py ]; then python vs_search_board_cfg.py; fi; make -j\n")))
 (defun dark/hide-vterm() "Hide vterm window"
     (interactive)
