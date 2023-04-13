@@ -56,12 +56,25 @@
 ;; they are implemented.
 
 
+;; (remove-hook '+doom-dashboard-functions #'doom-dashboard-widget-shortmenu)
+(remove-hook '+doom-dashboard-functions #'doom-dashboard-widget-footer)
+;; (add-hook! '+doom-dashboard-mode-hook (hl-line-mode -1))
+;; (setq-hook! '+doom-dashboard-mode-hook evil-normal-state-cursor (list nil))
+(setq fancy-splash-image (expand-file-name "assets/doom-emacs-gray.svg" doom-user-dir))
+
 ;; ----------------------------- mouse scroll --------------------------------
 ;; scroll one line at a time (less “jumpy” than defaults)
 (setq mouse-wheel-scroll-amount '(5 ((shift) . 8))) ;; 5 lines / 8 columns at a time,
 (setq mouse-wheel-progressive-speed nil) ;; don't accelerate scrolling
-(setq mouse-wheel-follow-mouse 't) ;; scroll window under mouse
+(setq mouse-wheel-follow-mouse t) ;; scroll window under mouse
+(setq mouse-wheel-tilt-scroll t) ;; Enable horizontal scrolling with the second mouse wheel or the touchpad
 ;; (setq scroll-step 1) ;; keyboard scroll 5 lines at a time
+
+;; ----------------------------- mouse button --------------------------------
+;; Map extra mouse buttons to jump between buffers
+(map! :after better-jumper
+      :nv [mouse-8] #'better-jumper-jump-backward
+      :nv [mouse-9] #'better-jumper-jump-forward)
 
 ;; -------------------------------- comment -----------------------------------
 ;; comment mode, positive: block, negative: line
@@ -77,11 +90,13 @@
        :background-color "#333333"
        :foreground-color "#dcdccc"
        :internal-border-width 10))
-;; ------------------------------ vim sneak -----------------------------------
+
+;; ------------------------------ ivy - avy -----------------------------------
 ;; avy, 2 char motion
 (map! :leader
       :desc "evil-avy-goto-char-2"
       "j j" #'evil-avy-goto-char-2)
+
 ;; make avy works across all visible windows
 (setq avy-all-windows t)
 
@@ -112,41 +127,50 @@
           (lambda () (modify-syntax-entry ?_ "w")))
 
 ;; ----------------------------------------------------------------------------
-
 ;; lsp
 (after! lsp-mode
   ;; enable breadcrumb and disable spell check
-  (setq lsp-headerline-breadcrumb-enable t)
-  (setq lsp-headerline-breadcrumb-enable-diagnostics nil)
-  ;; disable lsp code lense (SPC c l T l)
-  (setq lsp-lens-enable nil)
-  (setq lsp-ui-doc-show-with-cursor nil))
+  (setq lsp-headerline-breadcrumb-enable t
+    lsp-headerline-breadcrumb-enable-diagnostics nil
+    ;; hide unreachable ifdefs
+    ;; lsp-semantic-tokens-enable t
+    lsp-ui-sideline-show-hover t
+    ;; disable lsp code lense (SPC c l T l)
+    lsp-lens-enable nil
+    lsp-ui-doc-show-with-cursor nil))
 
 ;; ccls
 (after! ccls
-  (setq ccls-initialization-options '(:index (:comments 2) :completion (:detailedLabel t)))
+  (setq ccls-initialization-options
+        '(:index (:comments 2)
+          :completion (:detailedLabel t)))
   ;; optional as ccls is the default in Doom, if you want to use clangd, let the priority smaller than clangd
   (set-lsp-priority! 'ccls 2))
+
+;; clangd
+;; (after! lsp-clangd
+;;   (setq lsp-clients-clangd-args
+;;         '("--background-index"
+;;           "--clang-tidy"
+;;           "--completion-style=detailed"
+;;           "--header-insertion=never"
+;;           "--header-insertion-decorators=0"))
+;;   (set-lsp-priority! 'clangd 6))
+
 
 ;; ------------------------------------------ winnum --------------------------------------
 ;; winnum
 (use-package! winum
   :init
   (setq-default winum-scope 'frame-local)
+  (winum-mode)
   :config)
-(winum-mode)
 
 ;; Make Treemacs accessible as Window #0
 (after! (treemacs winum)
     (setq winum-ignored-buffers-regexp
           (delete (regexp-quote (format "%sFramebuffer-" treemacs--buffer-name-prefix))
                   winum-ignored-buffers-regexp)))
-
-
-;; magit show detail datetime instead of relative time
-(after! magit
-  (setq magit-log-margin '(t "%Y-%m-%d %H:%M " magit-log-margin-width t 18)))
-
 
 ;; SPC n to switch to winum-numbered window n
 (map!
@@ -162,29 +186,20 @@
     :desc "Switch to window 8" :n "8" #'winum-select-window-8
     :desc "Switch to window 9" :n "9" #'winum-select-window-9))
 
+;; ----------------------------------------------------------------------------
+;; magit show detail datetime instead of relative time
+(after! magit
+  (setq magit-log-margin '(t "%Y-%m-%d %H:%M " magit-log-margin-width t 18)))
+
+
 ;; --------------------------------------------------------------------------------
-;; buffer switch
+;; SPC l / SPC k for buffer switch
 (map!
  (:leader
   :desc "Next buffer" "l" #'next-buffer
   :desc "Previous buffer" "k" #'previous-buffer))
 
-
-;; consult
-;; (use-package! consult
-;; :config
-;; (consult-customize
-;;    consult-ripgrep consult-git-grep consult-grep
-;;    consult-bookmark consult-recent-file
-;;    +default/search-project +default/search-other-project
-;;    +default/search-project-for-symbol-at-point
-;;    +default/search-cwd +default/search-other-cwd
-;;    +default/search-notes-for-symbol-at-point
-;;    +default/search-emacsd
-;;    consult--source-recent-file consult--source-project-recent-file consult--source-bookmark
-;;    :preview-key '(:debounce 0.5 any)))
-
-
+;; --------------------------------------------------------------------------------
 ;; set the best font height for different screen resolution: 2K - 100, 4K - 180
 (map! :leader
       :desc "set font size to adapt 4K"
@@ -204,18 +219,18 @@
 (add-hook 'c-mode-common-hook 'remove-dos-eol)
 
 
+
 ;; -----------------------------------------------------------------------------------------
-;; remap p/c/s without yank
-(use-package evil
-  :ensure t
-  :config
-  (evil-mode 1)
-  ;; avy is more efficient than evil-snipe-s/S
+;; avy is more efficient than evil-snipe-s/S
+(after! (evil avy)
   (evil-define-key '(normal visual) evil-snipe-local-mode-map
     (kbd "s") 'evil-avy-goto-char-in-line
     (kbd "S") 'evil-avy-goto-char)
   (define-key evil-visual-state-map (kbd "S") 'evil-avy-goto-char-in-line)
-  (define-key evil-normal-state-map (kbd "S") 'evil-avy-goto-char)
+  (define-key evil-normal-state-map (kbd "S") 'evil-avy-goto-char))
+
+;; remap p/c/s without yank
+(after! evil
   ;; C-h/C-d to delete char on insert state
   (define-key evil-insert-state-map (kbd "C-h") 'evil-delete-backward-char-and-join)
   (define-key evil-insert-state-map (kbd "C-d") 'evil-delete-char)
@@ -241,48 +256,22 @@
   (define-key evil-normal-state-map (kbd "c") 'evil-change-no-yank)
   (define-key evil-visual-state-map (kbd "c") 'evil-change-no-yank)
   (define-key evil-visual-state-map (kbd "S") 'evil-change-whole-line-no-yank)
+
+  ;; This fixes https://github.com/doomemacs/doomemacs/issues/6478
+  ;; Ref: https://github.com/emacs-evil/evil/issues/1630
+  (evil-select-search-module 'evil-search-module 'isearch)
   (modify-syntax-entry ?_ "w"))
 
+
 ;; -----------------------------------------------------------------------------------------
-(use-package citre
-  :defer t
-  :init
-  ;; This is needed in `:init' block for lazy load to work.
-  (require 'citre-config)
-  ;; Bind your frequently used commands.  Alternatively, you can define them
-  ;; in `citre-mode-map' so you can only use them when `citre-mode' is enabled.
-  (global-set-key (kbd "C-c j") 'citre-jump)
-  (global-set-key (kbd "C-c h") 'citre-jump-back)
-  (global-set-key (kbd "<f1>") 'citre-peek)
-  (global-set-key (kbd "C-c c") 'citre-peek)
-  (global-set-key (kbd "C-c a") 'citre-ace-peek)
-  (global-set-key (kbd "C-c u") 'citre-update-this-tags-file)
-  :config
-  (setq citre-edit-cmd-buf-default-cmd "ctags\n-o\n%TAGSFILE%\n;; programming languages to be scanned, or \"all\" for all supported languages\n--languages=all\n--kinds-all=*\n--fields=*\n--extras=*\n--exclude=**/.ccls-cache/*\n-R\n;; add dirs/files to scan here, one line per dir/file\n")
-  (setq
-   ;; Set these if readtags/ctags is not in your PATH.
-   ;; citre-readtags-program "/path/to/readtags"
-   ;; citre-ctags-program "/path/to/ctags"
-   ;; Set these if gtags/global is not in your PATH (and you want to use the
-   ;; global backend)
-   ;; citre-gtags-program "/path/to/gtags"
-   ;; citre-global-program "/path/to/global"
-   ;; Set this if you use project management plugin like projectile.  It's
-   ;; used for things like displaying paths relatively, see its docstring.
-   citre-project-root-function #'projectile-project-root
-   ;; Set this if you want to always use one location to create a tags file.
-   ;; citre-default-create-tags-file-location 'global-cache
-   ;; See the "Create tags file" section above to know these options
-   citre-use-project-root-when-creating-tags t
-   citre-prompt-language-for-ctags-command t
-   ;; By default, when you open any file, and a tags file can be found for it,
-   ;; `citre-mode' is automatically enabled.  If you only want this to work for
-   ;; certain modes (like `prog-mode'), set it like this.
-   ;;citre-auto-enable-citre-mode-modes '(prog-mode)
-   )
-  (remove-hook 'find-file-hook #'citre-auto-enable-citre-mode))
+;; (use-package! tree-sitter
+;;   :hook (prog-mode . turn-on-tree-sitter-mode)
+;;   :hook (tree-sitter-after-on . tree-sitter-hl-mode) ;; syntax highlight
+;;   :hook (tree-sitter-after-on . (lambda() (setq lsp-enable-symbol-highlighting nil))) ;; disable lsp symbol highlight
+;;   :hook (tree-sitter-after-on . ts-fold-mode)) ;; fold by tree-sitter
 
 
+;; -----------------------------------------------------------------------------------------
 (defun upd-compile-json()
   "update compile_commands.json"
   (interactive)
@@ -292,16 +281,6 @@
                                       "if [ -f vs_search_board_cfg.py ]; then python vs_search_board_cfg.py; fi; "
                                       "make OS=X BUILD_DIR=objs-linux -Bnwk > compile.txt && python gen_compile_json.py && rm -f compile.txt;"))
     (lsp-restart-workspace)))
-
-
-(use-package! tree-sitter
-  :hook (prog-mode . turn-on-tree-sitter-mode)
-  :hook (tree-sitter-after-on . tree-sitter-hl-mode) ;; syntax highlight
-  :hook (tree-sitter-after-on . (lambda() (setq lsp-enable-symbol-highlighting nil))) ;; disable lsp symbol highlight
-  :hook (tree-sitter-after-on . ts-fold-mode)) ;; fold by tree-sitter
-;; :hook (tree-sitter-after-on . ts-fold-indicators-mode))
-;; -----------------------------------------------------------------------------------------
-
 
 ;; ------------------------------ vterm for make compile -------------------------------
 (defun dark/vterm-run-cmd (arg) "open vterm window and run cmd"
@@ -335,23 +314,24 @@
     (interactive)
     (+vterm/toggle nil))
 
-(global-set-key (kbd "<f12>") 'dark/project-build)
-(global-set-key (kbd "<f11>") 'dark/hide-vterm)
-(global-set-key (kbd "<f10>") 'dark/project-clean)
-(global-set-key (kbd "<f9>")  'dark/project-rebuild)
-(map! :after vterm :map vterm-mode-map :ni "<f12>" #'dark/project-build)
-(map! :after vterm :map vterm-mode-map :ni "<f11>" #'dark/hide-vterm)
-(map! :after vterm :map vterm-mode-map :ni "<f10>" #'dark/project-clean)
-(map! :after vterm :map vterm-mode-map :ni "<f9>"  #'dark/project-rebuild)
+(global-set-key (kbd "<f12>") #'dark/project-build)
+(global-set-key (kbd "<f11>") #'dark/hide-vterm)
+(global-set-key (kbd "<f10>") #'dark/project-clean)
+(global-set-key (kbd "<f9>")  #'dark/project-rebuild)
+(after! vterm
+  (map! :map vterm-mode-map :ni "<f12>" #'dark/project-build)
+  (map! :map vterm-mode-map :ni "<f11>" #'dark/hide-vterm)
+  (map! :map vterm-mode-map :ni "<f10>" #'dark/project-clean)
+  (map! :map vterm-mode-map :ni "<f9>"  #'dark/project-rebuild))
 
 ;; disable <M-num> in vterm (M-num is use for switch workspace)
-(map! :after vterm :map vterm-mode-map :ni "\M-1" nil)
-(map! :after vterm :map vterm-mode-map :ni "\M-2" nil)
-(map! :after vterm :map vterm-mode-map :ni "\M-3" nil)
-(map! :after vterm :map vterm-mode-map :ni "\M-4" nil)
-(map! :after vterm :map vterm-mode-map :ni "\M-5" nil)
-(map! :after vterm :map vterm-mode-map :ni "\M-6" nil)
-(map! :after vterm :map vterm-mode-map :ni "\M-7" nil)
-(map! :after vterm :map vterm-mode-map :ni "\M-8" nil)
-(map! :after vterm :map vterm-mode-map :ni "\M-9" nil)
-
+(after! vterm
+  (map! :map vterm-mode-map :ni "M-1" #'+workspace/switch-to-0)
+  (map! :map vterm-mode-map :ni "M-2" #'+workspace/switch-to-1)
+  (map! :map vterm-mode-map :ni "M-3" #'+workspace/switch-to-2)
+  (map! :map vterm-mode-map :ni "M-4" #'+workspace/switch-to-3)
+  (map! :map vterm-mode-map :ni "M-5" #'+workspace/switch-to-4)
+  (map! :map vterm-mode-map :ni "M-6" #'+workspace/switch-to-5)
+  (map! :map vterm-mode-map :ni "M-7" #'+workspace/switch-to-6)
+  (map! :map vterm-mode-map :ni "M-8" #'+workspace/switch-to-7)
+  (map! :map vterm-mode-map :ni "M-9" #'+workspace/switch-to-8))
