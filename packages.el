@@ -59,4 +59,3 @@
 
 (package! command-log-mode)
 
-(package! citre)
