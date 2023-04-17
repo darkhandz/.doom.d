@@ -257,9 +257,6 @@
   (define-key evil-visual-state-map (kbd "c") 'evil-change-no-yank)
   (define-key evil-visual-state-map (kbd "S") 'evil-change-whole-line-no-yank)
 
-  ;; This fixes https://github.com/doomemacs/doomemacs/issues/6478
-  ;; Ref: https://github.com/emacs-evil/evil/issues/1630
-  (evil-select-search-module 'evil-search-module 'isearch)
   (modify-syntax-entry ?_ "w"))
 
 
