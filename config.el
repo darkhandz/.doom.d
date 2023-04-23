@@ -163,6 +163,7 @@
 (use-package! winum
   :init
   (setq-default winum-scope 'frame-local)
+  (setq winum-auto-setup-mode-line nil)
   (winum-mode)
   :config)
 
@@ -268,7 +269,43 @@
 ;;   :hook (tree-sitter-after-on . ts-fold-mode)) ;; fold by tree-sitter
 
 
+;; ------------------------------------- awesome-tray --------------------------------------
+(defun dark/awesome-tray-module-line-char-count-info ()
+  (let* ((total-lines (count-lines (point-min) (point-max)))
+        (start (region-beginning)) (end (region-end))
+        (selected-lines (max 1 (count-lines start end)))
+        (chars (1+ (- end start))))
+    (if (region-active-p)
+        (format "%dC/%dL" chars selected-lines)
+      ;; (format "%dL" total-lines) ;; if you want to see total lines when no selection
+      )))
+
+(defface dark/awesome-tray-module-line-char-count-face
+  '((((background light)) :inherit awesome-tray-blue-bright-face)
+    (t :inherit awesome-tray-blue-bright-face))
+  "line and char count face."
+  :group 'awesome-tray)
+
+
+(use-package! awesome-tray
+  :init
+  (awesome-tray-mode 1)
+  :config
+  (add-hook 'after-change-major-mode-hook #'hide-mode-line-mode)
+  ;; (global-hide-mode-line-mode)
+  (add-to-list 'awesome-tray-module-alist
+    '("line-char" . (dark/awesome-tray-module-line-char-count-info
+                     dark/awesome-tray-module-line-char-count-face)))
+  (setq awesome-tray-active-modules '("anzu" "line-char" "location" "belong" "file-path" "git" "mode-name" "date"))
+  (setq awesome-tray-date-format "%m-%d %H:%M")
+  (setq awesome-tray-git-format "[%s]")
+  (setq awesome-tray-belong-update-duration 1)
+  )
 ;; -----------------------------------------------------------------------------------------
+
+;; -----------------------------------------------------------------------------------------
+;;
+;;
 (defun upd-compile-json()
   "update compile_commands.json"
   (interactive)
