@@ -91,15 +91,23 @@
        :foreground-color "#dcdccc"
        :internal-border-width 10))
 
-;; ------------------------------ ivy - avy -----------------------------------
+;; -------------------------------- ivy --------------------------------------
 ;; avy, 2 char motion
 (map! :leader
       :desc "evil-avy-goto-char-2"
       "j j" #'evil-avy-goto-char-2)
 
 ;; make avy works across all visible windows
-(setq avy-all-windows t)
+(after! ivy-avy
+  (setq avy-all-windows t))
 
+(after! ivy
+  ; preview buffer when selected
+  (setq +ivy-buffer-preview t)
+  ; to avoid one char triggered counsel-rg
+  (setq ivy-more-chars-alist '((counsel-rg . 2)
+                               (counsel-search . 2)
+                               (t . 3))))
 
 ;; ------------------------ whitespace-mode has bugs --------------------------
 ;; disbale whitespace-mode
