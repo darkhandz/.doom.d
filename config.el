@@ -269,6 +269,21 @@
   (modify-syntax-entry ?_ "w"))
 
 
+(defun jester/cycle-line-beginning-end ()
+  "Go to line text beginning, line end, line very beginning, in turn."
+  (interactive)
+  (cl-block 'my-return
+    (when (and (looking-at "[^\s]") (looking-back "^\s*")) (evil-end-of-line) (cl-return-from 'my-return)) ; at beg of line text
+    (when (looking-at (if evil-move-beyond-eol "$" ".$")) (evil-beginning-of-line) (cl-return-from 'my-return)) ; at end of line
+    (when (bolp) (evil-first-non-blank) (cl-return-from 'my-return)) ; at very beg of line
+    (evil-first-non-blank)))
+
+;; use '0' to jump to first-char, first-column, last-char
+(after! evil
+  (evil-define-key '(normal visual) 'global (kbd "0") #'jester/cycle-line-beginning-end)
+  (define-key evil-visual-state-map (kbd "0") #'jester/cycle-line-beginning-end)
+  (define-key evil-normal-state-map (kbd "0") #'jester/cycle-line-beginning-end))
+
 ;; -----------------------------------------------------------------------------------------
 ;; (use-package! tree-sitter
 ;;   :hook (prog-mode . turn-on-tree-sitter-mode)
