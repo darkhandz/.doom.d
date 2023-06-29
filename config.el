@@ -265,6 +265,8 @@
   (define-key evil-normal-state-map (kbd "c") 'evil-change-no-yank)
   (define-key evil-visual-state-map (kbd "c") 'evil-change-no-yank)
   (define-key evil-visual-state-map (kbd "S") 'evil-change-whole-line-no-yank)
+  (define-key evil-normal-state-map (kbd "R") '+default/search-buffer)
+  (define-key evil-visual-state-map (kbd "R") '+default/search-buffer)
 
   (modify-syntax-entry ?_ "w"))
 
