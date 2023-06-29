@@ -323,6 +323,8 @@
   (setq awesome-tray-date-format "%m-%d %H:%M")
   (setq awesome-tray-git-format "[%s]")
   (setq awesome-tray-belong-update-duration 1)
+  (setq awesome-tray-location-info-bottom " ↓")
+  (setq awesome-tray-location-info-top " ↑")
   )
 ;; -----------------------------------------------------------------------------------------
 
