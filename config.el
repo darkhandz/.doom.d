@@ -62,6 +62,14 @@
 ;; (setq-hook! '+doom-dashboard-mode-hook evil-normal-state-cursor (list nil))
 (setq fancy-splash-image (expand-file-name "assets/doom-emacs-gray.svg" doom-user-dir))
 
+;; ----------------------------- emacs >= 28.2 will use italic --------------------------------
+;; (set-face-attribute 'line-number nil :slant 'normal)
+;; (set-face-attribute 'line-number-current-line nil :slant 'normal)
+(use-package! display-line-numbers
+  :custom-face
+  (line-number ((t (:slant normal))))
+  (line-number-current-line ((t (:slant normal)))))
+
 ;; ----------------------------- mouse scroll --------------------------------
 ;; scroll one line at a time (less “jumpy” than defaults)
 (setq mouse-wheel-scroll-amount '(5 ((shift) . 8))) ;; 5 lines / 8 columns at a time,
