@@ -10,7 +10,7 @@
       user-mail-address "darkhandz0@gmail.com")
 
 ;; (setq doom-font (font-spec :family "Fira Code Retina" :size 14))
-(setq doom-font (font-spec :family "Maple Mono SC NF" :size 17 :weight 'bold))
+(setq doom-font (font-spec :family "Maple Mono SC NF" :size 18 :weight 'bold))
 (setq doom-unicode-font (font-spec :family "Maple Mono SC NF"))
 
 ;; Doom exposes five (optional) variables for controlling fonts in Doom. Here
@@ -38,6 +38,7 @@
 ;; This determines the style of line numbers in effect. If set to `nil', line
 ;; numbers are disabled. For relative line numbers, set this to `relative'.
 (setq display-line-numbers-type 'relative)
+(remove-hook! '(text-mode-hook) #'display-line-numbers-mode)
 ;; Here are some additional functions/macros that could help you configure Doom:
 ;;
 ;; - `load!' for loading external *.el files relative to this one
@@ -169,8 +170,8 @@
       "j j" #'evil-avy-goto-char-2)
 
 ;; make avy works across all visible windows
-(after! ivy-avy
-  (setq avy-all-windows t))
+;; (after! ivy-avy
+;;   (setq avy-all-windows t))
 
 (after! ivy
   ; preview buffer when selected
