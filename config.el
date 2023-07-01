@@ -62,6 +62,22 @@
 ;; (setq-hook! '+doom-dashboard-mode-hook evil-normal-state-cursor (list nil))
 (setq fancy-splash-image (expand-file-name "assets/doom-emacs-gray.svg" doom-user-dir))
 
+
+;; ----------------------------- frame title --------------------------------
+(setq frame-title-format
+  '(""
+    (:eval
+      (buffer-file-name))
+      ;; (if (s-contains-p org-roam-directory (or buffer-file-name ""))
+      ;;     (replace-regexp-in-string
+      ;;      ".*/[0-9]*-?" "☰ "
+      ;;      (subst-char-in-string ?_ ?  buffer-file-name))
+      ;;   "%b"))
+    (:eval
+      (let ((project-name (projectile-project-name)))
+      (unless (string= "-" project-name)
+      (format (if (buffer-modified-p)  " ◉ %s" "  ●  %s") project-name))))))
+
 ;; ----------------------------- emacs >= 28.2 will use italic --------------------------------
 ;; (set-face-attribute 'line-number nil :slant 'normal)
 ;; (set-face-attribute 'line-number-current-line nil :slant 'normal)
