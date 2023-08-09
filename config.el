@@ -359,12 +359,8 @@
   (define-key evil-normal-state-map (kbd "0") #'jester/cycle-line-beginning-end))
 
 ;; -----------------------------------------------------------------------------------------
-;; (use-package! tree-sitter
-;;   :hook (prog-mode . turn-on-tree-sitter-mode)
-;;   :hook (tree-sitter-after-on . tree-sitter-hl-mode) ;; syntax highlight
-;;   :hook (tree-sitter-after-on . (lambda() (setq lsp-enable-symbol-highlighting nil))) ;; disable lsp symbol highlight
-;;   :hook (tree-sitter-after-on . ts-fold-mode)) ;; fold by tree-sitter
-
+;; If set to nil or t it will fully disable or fully enable highlighting in every tree sitter enabled language respectively.
+(setq +tree-sitter-hl-enabled-modes t)
 
 ;; ------------------------------------- awesome-tray --------------------------------------
 (defun dark/awesome-tray-module-line-char-count-info ()
