@@ -175,7 +175,7 @@
 
 (after! ivy
   ; preview buffer when selected
-  (setq +ivy-buffer-preview t)
+  ;; (setq +ivy-buffer-preview t)
   ; to avoid one char triggered counsel-rg
   (setq ivy-more-chars-alist '((counsel-rg . 2)
                                (counsel-search . 2)
