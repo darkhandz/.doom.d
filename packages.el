@@ -61,6 +61,3 @@
 
 (package! awesome-tray
   :recipe (:host github :repo "darkhandz/awesome-tray"))
-
-(package! diff-hl
-  :recipe (:host github :repo "dgutov/diff-hl"))
