@@ -92,7 +92,7 @@
 
 ;; ----------------------------- mouse scroll --------------------------------
 ;; scroll one line at a time (less “jumpy” than defaults)
-(setq mouse-wheel-scroll-amount '(5 ((shift) . 8))) ;; 5 lines / 8 columns at a time,
+(setq mouse-wheel-scroll-amount '(3 ((shift) . 8))) ;; 3 lines / 8 columns at a time,
 (setq mouse-wheel-progressive-speed nil) ;; don't accelerate scrolling
 (setq mouse-wheel-follow-mouse t) ;; scroll window under mouse
 (setq mouse-wheel-tilt-scroll t) ;; Enable horizontal scrolling with the second mouse wheel or the touchpad
