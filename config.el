@@ -309,10 +309,10 @@
     (evil-first-non-blank)))
 
 ;; use '0' to jump to first-char, first-column, last-char
-(after! evil
-  (evil-define-key '(normal visual) 'global (kbd "0") #'jester/cycle-line-beginning-end)
-  (define-key evil-visual-state-map (kbd "0") #'jester/cycle-line-beginning-end)
-  (define-key evil-normal-state-map (kbd "0") #'jester/cycle-line-beginning-end))
+;; (after! evil
+;;   (evil-define-key '(normal visual) 'global (kbd "0") #'jester/cycle-line-beginning-end)
+;;   (define-key evil-visual-state-map (kbd "0") #'jester/cycle-line-beginning-end)
+;;   (define-key evil-normal-state-map (kbd "0") #'jester/cycle-line-beginning-end))
 
 ;; -----------------------------------------------------------------------------------------
 ;; If set to nil or t it will fully disable or fully enable highlighting in every tree sitter enabled language respectively.
