@@ -267,10 +267,10 @@
 ;; avy is more efficient than evil-snipe-s/S
 (after! (evil avy)
   (evil-define-key '(normal visual) evil-snipe-local-mode-map
-    (kbd "s") 'evil-avy-goto-char-in-line
-    (kbd "S") 'evil-avy-goto-char)
+    (kbd "S") 'evil-avy-goto-char-in-line
+    (kbd "s") 'evil-avy-goto-char)
   (define-key evil-visual-state-map (kbd "S") 'evil-avy-goto-char-in-line)
-  (define-key evil-normal-state-map (kbd "S") 'evil-avy-goto-char))
+  (define-key evil-normal-state-map (kbd "s") 'evil-avy-goto-char))
 
 ;; remap p/c/s without yank
 (after! evil
@@ -299,8 +299,8 @@
   (define-key evil-normal-state-map (kbd "c") 'evil-change-no-yank)
   (define-key evil-visual-state-map (kbd "c") 'evil-change-no-yank)
   (define-key evil-visual-state-map (kbd "S") 'evil-change-whole-line-no-yank)
-  (define-key evil-normal-state-map (kbd "R") '+default/search-buffer)
-  (define-key evil-visual-state-map (kbd "R") '+default/search-buffer)
+  (define-key evil-normal-state-map (kbd "\\") '+default/search-buffer)
+  (define-key evil-visual-state-map (kbd "\\") '+default/search-buffer)
 
   (modify-syntax-entry ?_ "w"))
 
