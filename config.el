@@ -439,14 +439,14 @@
 
 (defun dark/project-build() "switch board and make -j"
     (interactive)
-    (dark/vterm-run-cmd "make -j\n"))
+    ;; (dark/vterm-run-cmd "make -j\n"))
+    (dark/vterm-run-cmd (concat "cd $(git rev-parse --show-toplevel) && " (projectile-compilation-command (projectile-compilation-dir)) "\n")))
 (defun dark/project-clean() "make clean"
     (interactive)
     (dark/vterm-run-cmd "make clean\n"))
 (defun dark/project-rebuild() "clean build"
     (interactive)
-    (dark/vterm-run-cmd (concat "cd $(git rev-parse --show-toplevel) && cd $(fd 'Makefile' | head -n1 | xargs -n1 dirname ) && ulimit -n 8192 && "
-                                "make clean && if [ -f vs_search_board_cfg.py ]; then python vs_search_board_cfg.py; fi; make -j\n")))
+    (dark/vterm-run-cmd (concat "cd $(git rev-parse --show-toplevel) && " (projectile-test-command (projectile-compilation-dir)) "\n")))
 (defun dark/hide-vterm() "Hide vterm window"
     (interactive)
     (+vterm/toggle nil))
