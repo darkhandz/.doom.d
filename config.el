@@ -451,15 +451,15 @@
     (interactive)
     (+vterm/toggle nil))
 
-(global-set-key (kbd "<f12>") #'dark/project-build)
-(global-set-key (kbd "<f11>") #'dark/hide-vterm)
+(global-set-key (kbd "<f7>") #'dark/project-build)
+(global-set-key (kbd "<f6>") #'dark/hide-vterm)
 (global-set-key (kbd "<f10>") #'dark/project-clean)
-(global-set-key (kbd "<f9>")  #'dark/project-rebuild)
+(global-set-key (kbd "<f8>")  #'dark/project-rebuild)
 (after! vterm
-  (map! :map vterm-mode-map :ni "<f12>" #'dark/project-build)
-  (map! :map vterm-mode-map :ni "<f11>" #'dark/hide-vterm)
+  (map! :map vterm-mode-map :ni "<f7>" #'dark/project-build)
+  (map! :map vterm-mode-map :ni "<f6>" #'dark/hide-vterm)
   (map! :map vterm-mode-map :ni "<f10>" #'dark/project-clean)
-  (map! :map vterm-mode-map :ni "<f9>"  #'dark/project-rebuild))
+  (map! :map vterm-mode-map :ni "<f8>"  #'dark/project-rebuild))
 
 ;; disable <M-num> in vterm (M-num is use for switch workspace)
 (after! vterm
