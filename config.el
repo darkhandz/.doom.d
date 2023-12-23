@@ -137,6 +137,12 @@
                                (counsel-search . 2)
                                (t . 3))))
 
+;; -------------------------------- avy --------------------------------------
+(setq avy-all-windows t)
+(setq avy-keys-alist
+      `((avy-goto-char . ,(number-sequence ?a ?z))
+        (avy-goto-char-in-line . (?a ?s ?d ?f ?g ?h ?j ?k ?l ?q ?w ?e ?r ?u ?i ?o ?p))))
+
 ;; ------------------------ whitespace-mode has bugs --------------------------
 ;; disbale whitespace-mode
 (advice-add #'doom-highlight-non-default-indentation-h :override #'ignore)
