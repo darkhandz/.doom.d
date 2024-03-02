@@ -137,6 +137,10 @@
                                (counsel-search . 2)
                                (t . 3))))
 
+;; ----------------------------- projectile ----------------------------------
+; don't add projects automatically
+(setq projectile-track-known-projects-automatically nil)
+
 ;; -------------------------------- avy --------------------------------------
 (setq avy-all-windows t)
 (setq avy-keys-alist
