@@ -181,6 +181,11 @@
     lsp-lens-enable nil
     lsp-ui-doc-show-with-cursor nil))
 
+;; resolve Unknown key: :docs-link
+(after! lsp-mode
+  ;; https://github.com/emacs-lsp/lsp-mode/issues/3577#issuecomment-1709232622
+  (delete 'lsp-terraform lsp-client-packages))
+
 ;; ccls
 (after! ccls
   (setq ccls-initialization-options
