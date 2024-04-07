@@ -137,6 +137,11 @@
                                (counsel-search . 2)
                                (t . 3))))
 
+;; -------------------------------- corfu ------------------------------------
+; don't show current select item as visual text on input area
+(after! corfu
+  (setq corfu-preview-current nil))
+
 ;; ----------------------------- projectile ----------------------------------
 ; don't add projects automatically
 (setq projectile-track-known-projects-automatically nil)
