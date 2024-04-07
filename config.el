@@ -125,10 +125,6 @@
       :desc "evil-avy-goto-char-2"
       "j j" #'evil-avy-goto-char-2)
 
-;; make avy works across all visible windows
-;; (after! ivy-avy
-;;   (setq avy-all-windows t))
-
 (after! ivy
   ; preview buffer when selected
   ;; (setq +ivy-buffer-preview t)
@@ -147,10 +143,11 @@
 (setq projectile-track-known-projects-automatically nil)
 
 ;; -------------------------------- avy --------------------------------------
+;; make avy works across all visible windows
 (setq avy-all-windows t)
 (setq avy-keys-alist
-      `((avy-goto-char . ,(number-sequence ?a ?z))
-        (avy-goto-char-in-line . (?a ?s ?d ?f ?g ?h ?j ?k ?l ?q ?w ?e ?r ?u ?i ?o ?p))))
+  `((avy-goto-char . ,(number-sequence ?a ?z))
+    (avy-goto-char-in-line . (?a ?s ?d ?f ?g ?h ?j ?k ?l ?q ?w ?e ?r ?u ?i ?o ?p))))
 
 ;; ------------------------ whitespace-mode has bugs --------------------------
 ;; disbale whitespace-mode
