@@ -286,6 +286,23 @@
   (define-key evil-visual-state-map (kbd "S") 'evil-avy-goto-char-in-line)
   (define-key evil-normal-state-map (kbd "s") 'evil-avy-goto-char))
 
+
+;; ----------------------------------- symbol overlay --------------------------------------
+(after! symbol-overlay
+  (setq symbol-overlay-inhibit-map t) ; remove default keymap to avoid conflict with evil
+  (define-key evil-normal-state-map (kbd "#") 'symbol-overlay-put) ; more useful
+  (map!
+   (:leader
+    (:prefix ("d" . "symbol")
+    :desc "count"           "c"   #'symbol-overlay-count
+    :desc "remove all"      "r"   #'symbol-overlay-remove-all
+    :desc "backward"        "h"   #'symbol-overlay-switch-backward
+    :desc "forward"         "l"   #'symbol-overlay-switch-forward
+    :desc "next"            "n"   #'symbol-overlay-jump-next
+    :desc "previous"        "p"   #'symbol-overlay-jump-prev
+    :desc "rename"          "R"   #'symbol-overlay-query-replace))))
+
+
 ;; remap p/c/s without yank
 (after! evil
   ;; C-h/C-d to delete char on insert state

@@ -61,3 +61,5 @@
 
 (package! awesome-tray
   :recipe (:host github :repo "darkhandz/awesome-tray"))
+
+(package! symbol-overlay)
