@@ -250,11 +250,18 @@
 
 
 ;; --------------------------------------------------------------------------------
-;; SPC l / SPC k for buffer switch
+;; SPC l / SPC k for buffer navigation
 (map!
  (:leader
   :desc "Next buffer" "l" #'next-buffer
   :desc "Previous buffer" "k" #'previous-buffer))
+
+;; SPC [ / ] for version control hunk navigation
+(map!
+ (:leader
+  :desc "vc next hunk" "]" #'+vc-gutter/next-hunk
+  :desc "vc next hunk" "\\" #'+vc-gutter/next-hunk ; especially for my redox keyboard
+  :desc "vc prev hunk" "[" #'+vc-gutter/previous-hunk))
 
 ;; --------------------------------------------------------------------------------
 ;; set the best font height for different screen resolution: 2K - 100, 4K - 180
