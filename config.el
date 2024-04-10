@@ -292,7 +292,8 @@
 
 
 ;; ----------------------------------- symbol overlay --------------------------------------
-(after! symbol-overlay
+(use-package! symbol-overlay
+  :config
   (setq symbol-overlay-inhibit-map t) ; remove default keymap to avoid conflict with evil
   (define-key evil-normal-state-map (kbd "#") 'symbol-overlay-put) ; more useful
   (map!
