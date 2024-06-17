@@ -313,6 +313,7 @@
   ;; C-h/C-d to delete char on insert state
   (define-key evil-insert-state-map (kbd "C-h") 'evil-delete-backward-char-and-join)
   (define-key evil-insert-state-map (kbd "C-d") 'evil-delete-char)
+  (evil-define-key '(normal visual insert) 'global (kbd "C-s") 'save-buffer)
   (defun delete-selection-and-paste ()
     (interactive)
     (delete-region (region-beginning) (region-end))
