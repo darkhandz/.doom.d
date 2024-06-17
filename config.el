@@ -511,6 +511,15 @@
   (map! :map vterm-mode-map :ni "M-9" #'+workspace/switch-to-8))
 
 
+(add-hook 'emacs-lisp-mode-hook
+  (defun enable-autoreload-for-dir-locals ()
+  (when (and (buffer-file-name)
+          (equal dir-locals-file
+                  (file-name-nondirectory (buffer-file-name))))
+  (add-hook 'after-save-hook
+          'project-reload-dir-locals
+          nil t))))
+
 (defun project-reload-dir-locals (proj)
   "Read values from the current project's .dir-locals file and
 apply them in all project file buffers as if opening those files
