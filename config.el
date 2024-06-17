@@ -77,7 +77,7 @@
     (:eval
       (let ((project-name (projectile-project-name)))
       (unless (string= "-" project-name)
-      (format (if (buffer-modified-p)  " ◉ %s" "  ●  %s") project-name))))))
+      (format (if (buffer-modified-p)  " ◉ %s" "\t● %s ●") project-name))))))
 
 
 
