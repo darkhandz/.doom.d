@@ -187,6 +187,24 @@
     lsp-lens-enable nil
     lsp-ui-doc-show-with-cursor nil))
 
+(defun decrease-color-value (color valueR valueG valueB)
+  "Decrease each RGB component of COLOR by VALUE."
+  (let* ((r (string-to-number (substring color 1 3) 16))
+         (g (string-to-number (substring color 3 5) 16))
+         (b (string-to-number (substring color 5 7) 16))
+         (new-r (max 0 (- r valueR)))
+         (new-g (max 0 (- g valueG)))
+         (new-b (max 0 (- b valueB))))
+    (format "#%02x%02x%02x" new-r new-g new-b)))
+
+;; lsp-mode breadcrum background
+(after! lsp-mode
+  (if lsp-headerline-breadcrumb-enable
+    (if (equal (car custom-enabled-themes) 'doom-one-light)
+      (progn
+        (custom-set-faces!
+        `(header-line :background ,(decrease-color-value (doom-color 'bg) 10 8 18)))))))
+
 ;; resolve Unknown key: :docs-link
 (after! lsp-mode
   ;; https://github.com/emacs-lsp/lsp-mode/issues/3577#issuecomment-1709232622
