@@ -560,3 +560,18 @@ Signals an error if there is no current project."
           (setq-local dir-local-variables-alist locals)
           ;; and apply them.
           (hack-local-variables-apply))))))
+
+
+(defun syncting-trigger-on-save ()
+  "Send a curl request after a file is saved, if `syncthing-folder-id` is set."
+  (let ((folder-id (bound-and-true-p syncthing-folder-id))
+        ; The REST API key can be generated in the GUI (http://localhost:8384)
+        ; export SYNCTHING_API_KEY="xxxx"  and don't forget doom sync to update env
+        (api-key (getenv "SYNCTHING_API_KEY")))
+    (when (and folder-id api-key)
+      (start-process
+       "curl-process" nil
+       "curl" "-X" "POST" "-H" (concat "X-API-Key: " api-key)
+       "http://127.0.0.1:8384/rest/db/scan?folder=" folder-id))))
+
+(add-hook 'after-save-hook 'syncting-trigger-on-save)
