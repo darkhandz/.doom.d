@@ -10,8 +10,15 @@
       user-mail-address "darkhandz0@gmail.com")
 
 ;; (setq doom-font (font-spec :family "Fira Code Retina" :size 14))
-(setq doom-font (font-spec :family "Maple Mono SC NF" :size 18 :weight 'bold))
-(setq doom-unicode-font (font-spec :family "Maple Mono SC NF"))
+(setq doom-font (font-spec :family "Maple Mono NF CN" :size 18 :weight 'semi-bold))
+;; (setq doom-variable-pitch-font (font-spec :family "Noto Serif CJK SC" :size 16))
+(setq doom-symbol-font (font-spec :family "Maple Mono NF CN"))
+
+;; 为中文设置额外字体
+(if (eq system-type 'gnu/linux)
+(when (display-graphic-p)
+  (dolist (charset '(kana han cjk-misc bopomofo))
+    (set-fontset-font t charset (font-spec :family "Maple Mono NF CN")))))
 
 ;; Doom exposes five (optional) variables for controlling fonts in Doom. Here
 ;; are the three important ones:
@@ -37,7 +44,7 @@
 
 ;; This determines the style of line numbers in effect. If set to `nil', line
 ;; numbers are disabled. For relative line numbers, set this to `relative'.
-(setq display-line-numbers-type 'relative)
+(setq display-line-numbers-type t)
 (remove-hook! '(text-mode-hook) #'display-line-numbers-mode)
 ;; Here are some additional functions/macros that could help you configure Doom:
 ;;
@@ -68,18 +75,20 @@
 (setq frame-title-format
   '(""
     (:eval
-      (buffer-file-name))
+        (replace-regexp-in-string "/home/[^/]+" "🏠 ~" (or buffer-file-name "")))
+        ;; (or buffer-file-name ""))
       ;; (if (s-contains-p org-roam-directory (or buffer-file-name ""))
       ;;     (replace-regexp-in-string
       ;;      ".*/[0-9]*-?" "☰ "
       ;;      (subst-char-in-string ?_ ?  buffer-file-name))
       ;;   "%b"))
     (:eval
-      (let ((project-name (projectile-project-name)))
+      (let ((project-name (or projectile-project-name (buffer-name) "❓")))
       (unless (string= "-" project-name)
-      (format (if (buffer-modified-p)  " ◉ %s" "\t● %s ●") project-name))))))
+      (format (if (buffer-modified-p)  " ⋮ ◯ %s ◯" " ⋮ ● %s ●") project-name))))))
 
-
+;; for windows, when minimize window
+(setq icon-title-format frame-title-format)
 
 
 ;; ----------------------------- emacs >= 28.2 will use italic --------------------------------
@@ -92,11 +101,13 @@
 
 ;; ----------------------------- mouse scroll --------------------------------
 ;; scroll one line at a time (less “jumpy” than defaults)
-(setq mouse-wheel-scroll-amount '(3 ((shift) . 8))) ;; 3 lines / 8 columns at a time,
-(setq mouse-wheel-progressive-speed nil) ;; don't accelerate scrolling
-(setq mouse-wheel-follow-mouse t) ;; scroll window under mouse
-(setq mouse-wheel-tilt-scroll t) ;; Enable horizontal scrolling with the second mouse wheel or the touchpad
-;; (setq scroll-step 1) ;; keyboard scroll 5 lines at a time
+;; (unless (modulep! :ui smooth-scroll)
+  (setq mouse-wheel-scroll-amount '(3 ((shift) . 8))) ;; 3 lines / 8 columns at a time,
+  (setq mouse-wheel-progressive-speed nil) ;; don't accelerate scrolling
+  (setq mouse-wheel-follow-mouse t) ;; scroll window under mouse
+  (setq mouse-wheel-tilt-scroll t) ;; Enable horizontal scrolling with the second mouse wheel or the touchpad
+;;   ;; (setq scroll-step 1) ;; keyboard scroll 5 lines at a time
+;;   )
 
 ;; ----------------------------- mouse button --------------------------------
 ;; Map extra mouse buttons to jump between buffers
@@ -114,7 +125,7 @@
       rime-show-candidate 'posframe)
 (setq rime-user-data-dir "~/.config/fcitx/rime")
 (setq rime-posframe-properties
-    (list :font "Maple Mono SC NF"
+    (list :font "Maple Mono NF CN"
        :background-color "#333333"
        :foreground-color "#dcdccc"
        :internal-border-width 10))
@@ -126,6 +137,9 @@
       "j j" #'evil-avy-goto-char-2)
 
 (after! ivy
+  ; avoid rg hang on windows
+  (setq consult-async-input-debounce 0.3)
+  (setq counsel-async-command-delay 0.2)
   ; preview buffer when selected
   ;; (setq +ivy-buffer-preview t)
   ; to avoid one char triggered counsel-rg
@@ -141,6 +155,21 @@
 ;; ----------------------------- projectile ----------------------------------
 ; don't add projects automatically
 (setq projectile-track-known-projects-automatically nil)
+
+;; use projectile-project-name as workspace name if available
+(defun dk-workspace-name-fun (project-root)
+  "Return the name of the project.
+If `projectile-project-name` is non-nil, return its value.
+Otherwise, use `projectile-default-project-name`."
+  (or
+    ;; load `.dir-locals.el` from project-root
+    (with-temp-buffer
+      (setq default-directory project-root)
+      (hack-dir-local-variables-non-file-buffer)
+      (when (boundp 'projectile-project-name)
+        projectile-project-name))
+    (projectile-default-project-name project-root)))
+(setq projectile-project-name-function 'dk-workspace-name-fun)
 
 ;; -------------------------------- avy --------------------------------------
 ;; make avy works across all visible windows
@@ -184,8 +213,8 @@
     ;; lsp-semantic-tokens-enable t
     lsp-ui-sideline-show-hover t
     ;; disable lsp code lense (SPC c l T l)
-    lsp-lens-enable nil
-    lsp-ui-doc-show-with-cursor nil))
+    lsp-lens-enable nil)
+  (setq lsp-file-watch-threshold 5000))
 
 (defun decrease-color-value (color valueR valueG valueB)
   "Decrease each RGB component of COLOR by VALUE."
@@ -228,6 +257,8 @@
 ;;           "--header-insertion-decorators=0"))
 ;;   (set-lsp-priority! 'clangd 6))
 
+(after! lsp-pyright
+  (setq lsp-pyright-langserver-command "basedpyright-langserver"))
 
 ;; ------------------------------------------ winnum --------------------------------------
 ;; winnum
@@ -278,14 +309,22 @@
   :desc "vc next hunk" "\\" #'+vc-gutter/next-hunk ; especially for my redox keyboard
   :desc "vc prev hunk" "[" #'+vc-gutter/previous-hunk))
 
+;; SPC v for imenu
+(map!
+  (:leader
+   :desc "imenu" "e" #'counsel-imenu))
+
 ;; --------------------------------------------------------------------------------
 ;; set the best font height for different screen resolution: 2K - 100, 4K - 180
 (map! :leader
       :desc "set font size to adapt 4K"
       "j 4" #'(lambda () (interactive) (set-face-attribute 'default nil :height 180)))
 (map! :leader
-      :desc "set font size to adapt 2K"
-      "j 2" #'(lambda () (interactive) (set-face-attribute 'default nil :height 100)))
+      :desc "set font size medium"
+      "j 2" #'(lambda () (interactive) (set-face-attribute 'default nil :height 110)))
+(map! :leader
+      :desc "set font size smaller"
+      "j 1" #'(lambda () (interactive) (set-face-attribute 'default nil :height 95)))
 
 ;; Hide ^M
 (defun remove-dos-eol ()
@@ -359,21 +398,9 @@
 
   (modify-syntax-entry ?_ "w"))
 
-
-(defun jester/cycle-line-beginning-end ()
-  "Go to line text beginning, line end, line very beginning, in turn."
-  (interactive)
-  (cl-block 'my-return
-    (when (and (looking-at "[^\s]") (looking-back "^\s*")) (evil-end-of-line) (cl-return-from 'my-return)) ; at beg of line text
-    (when (looking-at (if evil-move-beyond-eol "$" ".$")) (evil-beginning-of-line) (cl-return-from 'my-return)) ; at end of line
-    (when (bolp) (evil-first-non-blank) (cl-return-from 'my-return)) ; at very beg of line
-    (evil-first-non-blank)))
-
-;; use '0' to jump to first-char, first-column, last-char
-;; (after! evil
-;;   (evil-define-key '(normal visual) 'global (kbd "0") #'jester/cycle-line-beginning-end)
-;;   (define-key evil-visual-state-map (kbd "0") #'jester/cycle-line-beginning-end)
-;;   (define-key evil-normal-state-map (kbd "0") #'jester/cycle-line-beginning-end))
+;; ------ jk to escape -------
+(after! evil-escape
+  (setq evil-escape-key-sequence "jk"))
 
 ;; -----------------------------------------------------------------------------------------
 ;; If set to nil or t it will fully disable or fully enable highlighting in every tree sitter enabled language respectively.
@@ -457,64 +484,138 @@
 
     (dolist (cmd '(pop-to-mark-command
                    pop-global-mark
+                   better-jumper-jump-forward
+                   better-jumper-jump-backward
                    goto-last-change))
       (advice-add cmd :after #'my-recenter-and-pulse))))
 
-
-;; -----------------------------------------------------------------------------------------
-;;
-;;
-(defun upd-compile-json()
-  "update compile_commands.json"
-  (interactive)
-  (progn
-    (shell-command-to-string (concat "cd $(git rev-parse --show-toplevel) && "
-                                      "cd $(fd 'Makefile' | head -n1 | xargs -n1 dirname ) && "
-                                      "if [ -f vs_search_board_cfg.py ]; then python vs_search_board_cfg.py; fi; "
-                                      "make OS=X BUILD_DIR=objs-linux -Bnwk > compile.txt && python gen_compile_json.py && rm -f compile.txt;"))
-    (lsp-restart-workspace)))
-
 ;; ------------------------------ vterm for make compile -------------------------------
-(defun dark/vterm-run-cmd (arg) "open vterm window and run cmd"
-       (interactive)
-       (let* (
-              (buffer-name
-               (format "*doom:vterm-popup:%s*"
-                       (if (bound-and-true-p persp-mode)
-                           (safe-persp-name (get-current-persp))
-                         "main")))
+(defun get-term-buffer-name()
+  (let* (
+         (use-eshell (modulep! :term eshell))
+         (use-vterm (modulep! :term vterm))
+         (buffer-name
+           (format (if use-eshell "*doom:eshell-popup:%s*" "*doom:vterm-popup:%s*")
+                  (if (bound-and-true-p persp-mode)
+                    (safe-persp-name (get-current-persp))
+                    "main")))
+         (buffer (get-buffer buffer-name))
+         (window (get-buffer-window buffer-name)))
+    (unless (and (buffer-live-p buffer) (window-live-p window))
+      (if use-eshell
+          (+eshell/toggle nil)
+        (if use-vterm
+          (+vterm/toggle nil)
+          (user-error "Neither eshell nor vterm is enabled"))))
+    buffer-name))
 
-              (buffer (get-buffer buffer-name))
-              (window (get-buffer-window buffer-name)))
-         (unless (and (buffer-live-p buffer) (window-live-p window))
-           (+vterm/toggle nil))
-         (with-current-buffer buffer-name
-           (let ((inhibit-read-only t))
-             (vterm-send-string arg)))))
+(defun detect-os-by-term-prompt ()
+  "在指定的终端buffer中检查最后一行非空字符，并根据最后一个非空白字符是'$'还是'>'返回'linux'或'win'，否则返回'unknown'。"
+  (let ((buffer-name (get-term-buffer-name)))
+    (with-current-buffer buffer-name
+      (save-excursion
+        (goto-char (point-max)) ;; 移动到buffer的末尾
+        (when (re-search-backward "[^ \t\n]" nil t)
+          (let ((char-at-point (char-after)))
+            (cond
+             ((eq char-at-point ?$) 'linux)
+             ((eq char-at-point ?>) 'win)
+             (t 'unknown))))))))
 
-(defun dark/project-build() "switch board and make -j"
-    (interactive)
-    ;; (dark/vterm-run-cmd "make -j\n"))
-    (dark/vterm-run-cmd (concat "cd $(git rev-parse --show-toplevel) && " (projectile-compilation-command (projectile-compilation-dir)) "\n")))
-(defun dark/project-clean() "make clean"
-    (interactive)
-    (dark/vterm-run-cmd "make clean\n"))
-(defun dark/project-rebuild() "clean build"
-    (interactive)
-    (dark/vterm-run-cmd (concat "cd $(git rev-parse --show-toplevel) && " (projectile-test-command (projectile-compilation-dir)) "\n")))
-(defun dark/hide-vterm() "Hide vterm window"
+
+(defun dark/term-run-cmd (arg) "Open term window and run cmd"
+  (interactive "sCommand: ")
+
+  (let ((buffer-name (get-term-buffer-name))
+        (use-eshell (modulep! :term eshell))
+        (use-vterm (modulep! :term vterm)))
+    (with-current-buffer buffer-name
+      (let ((inhibit-read-only t))
+        (cond
+          (use-vterm
+            (vterm-send-string arg)
+            (vterm-send-return))
+          (use-eshell
+            (+eshell-run-command arg buffer))
+          (t
+            (user-error "Neither eshell nor vterm is enabled")))
+      ))))
+
+
+(defun dark/vterm-toggle() "Hide vterm window"
     (interactive)
     (+vterm/toggle nil))
 
-(global-set-key (kbd "<f7>") #'dark/project-build)
-(global-set-key (kbd "<f6>") #'dark/hide-vterm)
-(global-set-key (kbd "<f10>") #'dark/project-clean)
-(global-set-key (kbd "<f8>")  #'dark/project-rebuild)
+
+;; load .dark.el from project root
+(defun dk-load-cfg-file ()
+  (let* ((project-root (or (doom-project-root) default-directory))
+         ;; (setenv "PROOT" project-root)
+         (dk-cfg-path (expand-file-name ".dark.el" project-root)))
+    (if (file-exists-p dk-cfg-path)
+      (let ((inhibit-message t))
+        (load-file dk-cfg-path)))))
+
+(defun dk-load-cfg-after-workspace-created (&rest _args)
+  (run-with-timer 2 nil #'dk-load-cfg-file))
+
+;; load once after new workspace created
+(advice-add '+workspace-new :after #'dk-load-cfg-after-workspace-created)
+
+
+;; Define a helper function to load config and run command
+(defun dark/run-cmd-with-cfg (cmd-var)
+  "Load the configuration file and execute the specified command.
+CMD-VAR is a symbol representing the variable holding the command string."
+  (interactive)
+  (dk-load-cfg-file)
+  (if dk-run-at-remote-win
+    (let ((os (detect-os-by-term-prompt)))
+      (cond
+       ((eq os 'linux)
+        (dark/term-run-cmd dk-login-remote))
+       ((eq os 'win)
+        ;; 在这里添加针对Windows的具体命令
+        (dark/term-run-cmd (symbol-value cmd-var)))
+       (t
+        ;; 在这里添加通用或未知情况下的命令, \x03是Ctrl-C
+        (dark/term-run-cmd "\x03"))))
+    (dark/term-run-cmd (symbol-value cmd-var))))
+
+
+;; Define key-to-command mappings (use symbols for command variables)
+(defconst dark/key-cmd-alist
+  '(("<f1>" . dk-f1-cmd)
+    ("<f2>" . dk-f2-cmd)
+    ("<f3>" . dk-f3-cmd)
+    ("<f4>" . dk-f4-cmd)
+    ("<f5>" . dk-f5-cmd)
+    ("<f7>" . dk-f7-cmd)
+    ("<f8>" . dk-f8-cmd)
+    ("<f9>" . dk-f9-cmd)
+    ("<f10>" . dk-f10-cmd)
+    ("<f12>" . dk-f12-cmd))
+  "Mapping of F1-F12 keys to their respective command variables.")
+
+;; Define a function to set keybindings for a given keymap
+(defun dark/set-keybindings (keymap)
+  "Set keybindings for the specified KEYMAP."
+  (dolist (key-cmd dark/key-cmd-alist)
+    (let ((key (car key-cmd))
+          (cmd-var (cdr key-cmd)))  ;; cmd-var is a symbol
+      (define-key keymap (kbd key)
+        (lambda () (interactive)
+          (dark/run-cmd-with-cfg cmd-var)))))  ;; Pass the symbol, not the value
+  (define-key keymap (kbd "<f6>") #'dark/vterm-toggle))
+
+;; Set global keybindings
+(dark/set-keybindings (current-global-map))
+
+;; Set vterm-mode keybindings
 (after! vterm
-  (map! :map vterm-mode-map :ni "<f7>" #'dark/project-build)
-  (map! :map vterm-mode-map :ni "<f6>" #'dark/hide-vterm)
-  (map! :map vterm-mode-map :ni "<f10>" #'dark/project-clean)
-  (map! :map vterm-mode-map :ni "<f8>"  #'dark/project-rebuild))
+  (dark/set-keybindings vterm-mode-map))
+
+
 
 ;; disable <M-num> in vterm (M-num is use for switch workspace)
 (after! vterm
@@ -529,14 +630,25 @@
   (map! :map vterm-mode-map :ni "M-9" #'+workspace/switch-to-8))
 
 
+;; -----------------------------------------------------------------------------------------
+;; invalidate filename cache after .ignore changed
+(defun update-project-files-by-ignore ()
+  (when (and t (buffer-file-name)
+    (equal ".ignore"
+    (file-name-nondirectory (buffer-file-name))))
+    (projectile-invalidate-cache nil)))
+
+(add-hook 'after-save-hook 'update-project-files-by-ignore)
+
+
+
+;; -----------------------------------------------------------------------------------------
 (add-hook 'emacs-lisp-mode-hook
   (defun enable-autoreload-for-dir-locals ()
   (when (and (buffer-file-name)
-          (equal dir-locals-file
-                  (file-name-nondirectory (buffer-file-name))))
-  (add-hook 'after-save-hook
-          'project-reload-dir-locals
-          nil t))))
+        (equal dir-locals-file
+          (file-name-nondirectory (buffer-file-name))))
+  (add-hook 'after-save-hook 'project-reload-dir-locals nil t))))
 
 (defun project-reload-dir-locals (proj)
   "Read values from the current project's .dir-locals file and
@@ -549,7 +661,6 @@ Signals an error if there is no current project."
     (user-error "There doesn't seem to be a project here"))
   ;; Load the variables; they are stored buffer-locally, so...
   (hack-dir-local-variables)
-  (message "test")
   ;; Hold onto them...
   (let ((locals dir-local-variables-alist))
     (dolist (buffer (buffer-list))
@@ -562,16 +673,105 @@ Signals an error if there is no current project."
           (hack-local-variables-apply))))))
 
 
-(defun syncting-trigger-on-save ()
+;; -----------------------------------------------------------------------------------------
+(defun syncthing-trigger-on-save ()
   "Send a curl request after a file is saved, if `syncthing-folder-id` is set."
   (let ((folder-id (bound-and-true-p syncthing-folder-id))
         ; The REST API key can be generated in the GUI (http://localhost:8384)
-        ; export SYNCTHING_API_KEY="xxxx"  and don't forget doom sync to update env
-        (api-key (getenv "SYNCTHING_API_KEY")))
+        ; Linux: export SYNCTHING_API_KEY="xxxx"
+        ; Windows: System - Advance System Setting - Environment variable - User variable - New - Variable: SYNCTHING_API_KEY Value: xxxx
+        ; and don't forget to run `doom sync` to update env after env set
+        (api-key (getenv "SYNCTHING_API_KEY"))
+        (server (getenv "SYNCTHING_SERVER")))
     (when (and folder-id api-key)
       (start-process
        "curl-process" nil
        "curl" "-X" "POST" "-H" (concat "X-API-Key: " api-key)
-       "http://127.0.0.1:8384/rest/db/scan?folder=" folder-id))))
+       (concat server "/rest/db/scan?folder=" folder-id)))
+    (let ((inhibit-message t))
+      (message (format "syncthing: %s %s %s" server folder-id api-key)))
+    ))
 
-(add-hook 'after-save-hook 'syncting-trigger-on-save)
+(add-hook 'after-save-hook 'syncthing-trigger-on-save)
+
+
+(defun dk-syncthing-after-magit (&rest _args)
+  (syncthing-trigger-on-save))
+
+(after! magit
+  (advice-add 'magit-file-checkout :after #'dk-syncthing-after-magit)
+  (advice-add 'magit-file-delete :after #'dk-syncthing-after-magit)
+  (advice-add 'magit-file-rename :after #'dk-syncthing-after-magit)
+  (advice-add 'magit-branch-reset :after #'dk-syncthing-after-magit)
+  (advice-add 'magit-checkout :after #'dk-syncthing-after-magit)
+  (advice-add 'magit-merge-plain :after #'dk-syncthing-after-magit)
+  (advice-add 'magit-reset-internal :after #'dk-syncthing-after-magit)
+  (advice-add 'magit-stash--apply :after #'dk-syncthing-after-magit)
+  (advice-add 'git-rebase-merge :after #'dk-syncthing-after-magit)
+  (advice-add 'magit-discard-apply :after #'dk-syncthing-after-magit)
+  (advice-add 'magit-discard-files :after #'dk-syncthing-after-magit)
+  (advice-add 'magit-reverse-apply :after #'dk-syncthing-after-magit)
+  (advice-add 'magit-reverse-files :after #'dk-syncthing-after-magit)
+  (advice-add 'magit-apply-patch :after #'dk-syncthing-after-magit)
+)
+
+;; -----------------------------------------------------------------------------------------
+;; when we in WSL2 and want to open the file in windows real path
+(defun dk-open-file-in-explorer ()
+  "Open the folder of the current file in Explorer. If running on Linux, check if dk-proj-wsl-root and dk-proj-win-root are defined.
+   If defined, perform replacement; if not, use wslpath to convert the WSL path to a Windows path. For non-Linux systems, directly adjust the slashes."
+  (interactive)
+  (let ((file (or buffer-file-name default-directory)))
+    (when file
+      (setq file (expand-file-name file))  ;; 确保路径是绝对路径
+      ;; 判断当前操作系统是否为 Linux (通常用于 WSL 环境下)
+      (if (eq system-type 'gnu/linux)
+          (if (and (boundp 'dk-proj-wsl-root) (boundp 'dk-proj-win-root))
+              ;; 如果 dk-proj-wsl-root 和 dk-proj-win-root 已定义，进行路径替换
+              (setq file (replace-regexp-in-string
+                          (regexp-quote dk-proj-wsl-root) dk-proj-win-root file))
+            ;; 否则使用 wslpath 将路径转换为 Windows 路径
+            (setq file (shell-command-to-string (concat "wslpath -w " (shell-quote-argument file))))))
+      ;; 将路径中的 / 转换为 Windows 风格的 \ 分隔符（适用于 Windows 或其他平台）
+      (setq file (replace-regexp-in-string "/" "\\\\" file))
+      ;; 打开资源管理器，选择文件
+      (start-process "explorer" nil "explorer.exe" (concat "/select," file)))))
+
+;; when we in Linux, files are all in local
+(defun dk-open-file-manager-and-select ()
+  "Open the default file manager and select the file.
+  If no file is associated with the current buffer,
+  prompt the user to select a file."
+  (interactive)
+  (let ((file (or (buffer-file-name)
+                  (read-file-name "Select file: "))))
+    (cond
+     ;; Windows
+     ((eq system-type 'windows-nt)
+      (call-process-shell-command (format "explorer /select,%s" (replace-regexp-in-string "/" "\\\\" file)) nil 0))
+     ;; macOS
+     ((eq system-type 'darwin)
+      (call-process-shell-command (format "open -R %s" (shell-quote-argument file)) nil 0))
+     ;; Linux (检测桌面环境)
+     ((eq system-type 'gnu/linux)
+      (let ((fm (cond
+                 ((executable-find "dolphin") "dolphin --select")
+                 ((executable-find "nautilus") "nautilus --no-desktop --browser")
+                 ((executable-find "thunar") "thunar")
+                 (t nil))))
+        (if fm
+            (call-process-shell-command (format "%s %s" fm (shell-quote-argument file)) nil 0)
+          (message "No known file manager found!")))))
+    (message "Opened file manager for: %s" file)))
+
+(defun dk-open-in-file-manager ()
+  (interactive)
+  (cond
+   ((eq system-type 'windows-nt) (dk-open-file-in-explorer))
+   ((eq system-type 'darwin) (dk-open-file-manager-and-select))
+   ((eq system-type 'gnu/linux) (dk-open-file-manager-and-select))
+   (t (message "Unsupported OS"))))
+
+(map! :leader
+      :desc "Browse in file manager"
+      "o o" #'dk-open-in-file-manager)
