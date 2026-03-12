@@ -101,6 +101,17 @@
 ;; -------------------------------- comment -----------------------------------
 ;; comment mode, positive: block, negative: line
 (add-hook 'c-mode-hook (lambda () (c-toggle-comment-style -1)))
+(add-hook 'c-ts-mode-hook (lambda () (c-ts-mode-toggle-comment-style -1)))
+
+;; --------------------------------- indent -----------------------------------
+;; 设置 c-ts-mode 默认缩进为 4 空格
+;; 项目中的 .editorconfig 或 .dir-locals.el 仍会覆盖此设置
+(setq c-ts-mode-indent-offset 4)
+;; 如果你也想设置 tab-width 和使用空格
+(add-hook 'c-ts-mode-hook
+          (lambda ()
+            (setq-local tab-width 4)
+            (setq-local indent-tabs-mode nil)))
 
 ;; -------------------------------- ivy --------------------------------------
 ;; avy, 2 char motion
@@ -158,6 +169,12 @@ Otherwise, use `projectile-default-project-name`."
           (lambda () (modify-syntax-entry ?_ "w")))
 ;; For Javascript
 (add-hook 'js2-mode-hook
+          (lambda () (modify-syntax-entry ?_ "w")))
+;; For ld script
+(add-hook 'ld-script-mode-hook
+          (lambda () (modify-syntax-entry ?_ "w")))
+;; For elisp
+(add-hook 'emacs-lisp-mode-hook
           (lambda () (modify-syntax-entry ?_ "w")))
 
 ;; ----------------------------------------------------------------------------
