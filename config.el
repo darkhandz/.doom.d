@@ -752,16 +752,33 @@ Supports ivy-resume."
      ((not root)
       (message "No project root found"))
      ((file-exists-p ignore-file)
-      (find-file ignore-file))
+     (find-file ignore-file))
      (t
       (message "No .ignore found in %s" root)))))
+
+;; Open .dark.el in current project root
+(defun my/open-project-dark ()
+  "Open .dark.el in the current project root, or message if missing."
+  (interactive)
+  (let* ((root (or (doom-project-root)
+                   (and (fboundp 'projectile-project-root)
+                        (projectile-project-root))))
+         (dark-file (and root (expand-file-name ".dark.el" root))))
+    (cond
+     ((not root)
+      (message "No project root found"))
+     ((file-exists-p dark-file)
+      (find-file dark-file))
+     (t
+      (message "No .dark.el found in %s" root)))))
 
 ;; 按键绑定
 (map! :leader
       (:prefix ("g" . "git")
        :desc "Open repo list" "a" #'my/magit-status-submodule
        :desc "Refresh & select repo" "A" #'my/magit-status-submodule-refresh
-       :desc "Open .ignore" "i" #'my/open-project-ignore))
+       :desc "Open .ignore" "i" #'my/open-project-ignore
+       :desc "Open .dark.el" "d" #'my/open-project-dark))
 
 
 
