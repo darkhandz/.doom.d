@@ -748,3 +748,38 @@ Supports ivy-resume."
 ;; advice workspace 切换函数
 (advice-add '+workspace/switch-to :after #'my/workspace-switch-hook)
 
+
+
+;; -------------------- 查找所有文件，不理会ignore规则 ------------------------
+(defun +projectile-find-file-all ()
+  "Find any file in the current project, ignoring ignore rules.
+Works with Ivy if available, otherwise falls back to completing-read."
+  (interactive)
+  (let* ((project-root (projectile-project-root))
+         ;; 确保命令在 project-root 下执行
+         (default-directory project-root)
+         (cmd (cond
+               ((executable-find "fd")
+                "fd . --type f -I --hidden --follow")
+               ((executable-find "fdfind")
+                "fdfind . --type f --hidden --follow")
+               (t "find . -type f")))
+         (files (split-string
+                 (shell-command-to-string cmd)
+                 "\n" t)))
+    (if (require 'ivy nil t) ;; 检查 ivy 是否可用
+        (ivy-read "Find file (all): "
+                  files
+                  :action (lambda (f)
+                            (find-file (expand-file-name f project-root)))
+                  :caller '+projectile-find-file-all)
+      ;; fallback: 用 completing-read
+      (let ((f (completing-read "Find file (all): " files)))
+        (find-file (expand-file-name f project-root))))))
+
+
+;; 绑定快捷键 SPC _
+(map! :leader
+      :desc "Find all files (ignore rules)"
+      "_" #'+projectile-find-file-all)
+
