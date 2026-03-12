@@ -738,11 +738,30 @@ Supports ivy-resume."
   (my/refresh-repo-submodules-cache)
   (my/magit-status-submodule))
 
+
+
+;; Open .ignore in current project root
+(defun my/open-project-ignore ()
+  "Open .ignore in the current project root, or message if missing."
+  (interactive)
+  (let* ((root (or (doom-project-root)
+                   (and (fboundp 'projectile-project-root)
+                        (projectile-project-root))))
+         (ignore-file (and root (expand-file-name ".ignore" root))))
+    (cond
+     ((not root)
+      (message "No project root found"))
+     ((file-exists-p ignore-file)
+      (find-file ignore-file))
+     (t
+      (message "No .ignore found in %s" root)))))
+
 ;; 按键绑定
 (map! :leader
       (:prefix ("g" . "git")
        :desc "Open repo list" "a" #'my/magit-status-submodule
-       :desc "Refresh & select repo" "A" #'my/magit-status-submodule-refresh))
+       :desc "Refresh & select repo" "A" #'my/magit-status-submodule-refresh
+       :desc "Open .ignore" "i" #'my/open-project-ignore))
 
 
 
