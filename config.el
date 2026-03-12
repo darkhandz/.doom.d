@@ -395,13 +395,18 @@ Otherwise, use `projectile-default-project-name`."
 
 ;; load .dark.el from project root
 (defun dk-load-cfg-file ()
-  (let* ((project-root (or (lsp-workspace-root) (doom-project-root) default-directory))
-         ;; (setenv "PROOT" project-root)
+"静默加载项目根目录的 .dark.el，且不干扰 minibuffer 显示"
+  (let* ((project-root (or (when (bound-and-true-p lsp-mode)
+                             (lsp-workspace-root))
+                           (doom-project-root)
+                           default-directory))
          (dk-cfg-path (expand-file-name ".dark.el" project-root)))
-    (message dk-cfg-path)
-    (if (file-exists-p dk-cfg-path)
-      (let ((inhibit-message t))
-        (load-file dk-cfg-path)))))
+    (when (and dk-cfg-path (file-exists-p dk-cfg-path))
+      ;; 关键：不产生任何 message，避免覆盖 workspace tabline
+      (let ((inhibit-message t)
+            (message-log-max nil))
+        (load dk-cfg-path nil 'nomessage 'nosuffix)))))
+
 
 (defun dk-load-cfg-after-workspace-created (&rest _args)
   (run-with-timer 2 nil #'dk-load-cfg-file))
