@@ -800,3 +800,76 @@ Works with Ivy if available, otherwise falls back to completing-read."
                   (:width (lambda (x) (ivy-rich-switch-buffer-shorten-path x (ivy-rich-minibuffer-width 0.3))))))
                 :delimiter "  ")))
 
+
+;; ------------------- 为 eldoc 结果中的整数添加十六进制显示，十六进制则显示十进制 --------------------
+(defun my/format-hex-padded (num)
+  "格式化数字为偶数位的小写十六进制"
+  (let* ((hex (format "%x" num))
+         (len (length hex)))
+    (if (cl-oddp len)
+        (concat "0" hex)
+      hex)))
+
+(defun my/hex-to-decimal (hex-str)
+  "将十六进制字符串转换为十进制数"
+  (string-to-number (replace-regexp-in-string "^0[xX]" "" hex-str) 16))
+
+(defun my/eldoc-add-hex-value (result)
+  "为 eldoc 结果中的整数添加十六进制显示，十六进制则显示十进制"
+  (when (stringp result)
+    ;; 跳过已经包含括号转换的结果
+    (unless (string-match-p "([0-9xXa-fA-F]+)" result)
+      ;; 匹配 NAME = 0xHEX 格式，转换为十进制
+      (setq result
+            (replace-regexp-in-string
+             "\\b\\([A-Za-z_][A-Za-z0-9_]*\\)\\s-*=\\s-*\\(0[xX][0-9a-fA-F]+\\)\\s-*$"
+             (lambda (match)
+               (let* ((name (match-string 1 match))
+                      (hex-str (match-string 2 match))
+                      (num (my/hex-to-decimal hex-str)))
+                 (format "%s = %s (%d)" name hex-str num)))
+             result))
+      ;; 匹配 #define NAME 0xHEX 格式，转换为十进制
+      (setq result
+            (replace-regexp-in-string
+             "#define\\s-+\\([A-Za-z_][A-Za-z0-9_]*\\)\\s-+\\(0[xX][0-9a-fA-F]+\\)\\s-*$"
+             (lambda (match)
+               (let* ((name (match-string 1 match))
+                      (hex-str (match-string 2 match))
+                      (num (my/hex-to-decimal hex-str)))
+                 (format "#define %s %s (%d)" name hex-str num)))
+             result))
+      ;; 匹配 NAME = 十进制 格式，转换为十六进制
+      (setq result
+            (replace-regexp-in-string
+             "\\b\\([A-Za-z_][A-Za-z0-9_]*\\)\\s-*=\\s-*\\(-?[1-9][0-9]*\\)\\s-*$"
+             (lambda (match)
+               (let* ((name (match-string 1 match))
+                      (num-str (match-string 2 match))
+                      (num (string-to-number num-str))
+                      (abs-num (logand num #xFFFFFFFFFFFFFFFF)))
+                 (if (or (> num 9) (< num -9))
+                     (format "%s = %s (0x%s)" name num-str
+                             (my/format-hex-padded abs-num))
+                   match)))
+             result))
+      ;; 匹配 #define NAME 十进制 格式，转换为十六进制
+      (setq result
+            (replace-regexp-in-string
+             "#define\\s-+\\([A-Za-z_][A-Za-z0-9_]*\\)\\s-+\\([1-9][0-9]*\\)\\s-*$"
+             (lambda (match)
+               (let* ((name (match-string 1 match))
+                      (num-str (match-string 2 match))
+                      (num (string-to-number num-str))
+                      (abs-num (logand num #xFFFFFFFFFFFFFFFF)))
+                 (if (> num 9)
+                     (format "#define %s %s (0x%s)" name num-str
+                             (my/format-hex-padded abs-num))
+                   match)))
+             result))))
+  result)
+
+(after! lsp-mode
+  (advice-add 'lsp--render-element :filter-return #'my/eldoc-add-hex-value))
+
+
