@@ -5,48 +5,64 @@
 
 
 ;; Some functionality uses this to identify you, e.g. GPG configuration, email
-;; clients, file templates and snippets.
+;; clients, file templates and snippets. It is optional.
 (setq user-full-name "darkhandz"
       user-mail-address "darkhandz0@gmail.com")
+
+;; Doom exposes five (optional) variables for controlling fonts in Doom:
+;;
+;; - `doom-font' -- the primary font to use
+;; - `doom-variable-pitch-font' -- a non-monospace font (where applicable)
+;; - `doom-big-font' -- used for `doom-big-font-mode'; use this for
+;;   presentations or streaming.
+;; - `doom-symbol-font' -- for symbols
+;; - `doom-serif-font' -- for the `fixed-pitch-serif' face
+;;
+;; See 'C-h v doom-font' for documentation and more examples of what they
+;; accept. For example:
+;;
+;;(setq doom-font (font-spec :family "Fira Code" :size 12 :weight 'semi-light)
+;;      doom-variable-pitch-font (font-spec :family "Fira Sans" :size 13))
+;;
+;; If you or Emacs can't find your font, use 'M-x describe-font' to look them
+;; up, `M-x eval-region' to execute elisp code, and 'M-x doom/reload-font' to
+;; refresh your font settings. If Emacs still can't find your font, it likely
+;; wasn't installed correctly. Font issues are rarely Doom issues!
 
 ;; (setq doom-font (font-spec :family "Fira Code Retina" :size 14))
 (setq doom-font (font-spec :family "Maple Mono NF CN" :size 18 :weight 'semi-bold))
 ;; (setq doom-variable-pitch-font (font-spec :family "Noto Serif CJK SC" :size 16))
 (setq doom-symbol-font (font-spec :family "Maple Mono NF CN"))
 
-;; 为中文设置额外字体
-(if (eq system-type 'gnu/linux)
-(when (display-graphic-p)
-  (dolist (charset '(kana han cjk-misc bopomofo))
-    (set-fontset-font t charset (font-spec :family "Maple Mono NF CN")))))
-
-;; Doom exposes five (optional) variables for controlling fonts in Doom. Here
-;; are the three important ones:
-;;
-;; + `doom-font'
-;; + `doom-variable-pitch-font'
-;; + `doom-big-font' -- used for `doom-big-font-mode'; use this for
-;;   presentations or streaming.
-;;
-;; They all accept either a font-spec, font string ("Input Mono-12"), or xlfd
-;; font string. You generally only need these two:
-;; (setq doom-font (font-spec :family "monospace" :size 12 :weight 'semi-light)
-;;       doom-variable-pitch-font (font-spec :family "sans" :size 13))
 
 ;; There are two ways to load a theme. Both assume the theme is installed and
 ;; available. You can either set `doom-theme' or manually load a theme with the
 ;; `load-theme' function. This is the default:
 (setq doom-theme 'doom-one-light)
 
+;; This determines the style of line numbers in effect. If set to `nil', line
+;; numbers are disabled. For relative line numbers, set this to `relative'.
+(setq display-line-numbers-type t)
+
 ;; If you use `org' and don't want your org files in the default location below,
 ;; change `org-directory'. It must be set before org loads!
 (setq org-directory "~/org/")
 
-;; This determines the style of line numbers in effect. If set to `nil', line
-;; numbers are disabled. For relative line numbers, set this to `relative'.
-(setq display-line-numbers-type t)
-(remove-hook! '(text-mode-hook) #'display-line-numbers-mode)
-;; Here are some additional functions/macros that could help you configure Doom:
+
+;; Whenever you reconfigure a package, make sure to wrap your config in an
+;; `after!' block, otherwise Doom's defaults may override your settings. E.g.
+;;
+;;   (after! PACKAGE
+;;     (setq x y))
+;;
+;; The exceptions to this rule:
+;;
+;;   - Setting file/directory variables (like `org-directory')
+;;   - Setting variables which explicitly tell you to set them before their
+;;     package is loaded (see 'C-h v VARIABLE' to look up their documentation).
+;;   - Setting doom variables (which start with 'doom-' or '+').
+;;
+;; Here are some additional functions/macros that will help you configure Doom.
 ;;
 ;; - `load!' for loading external *.el files relative to this one
 ;; - `use-package!' for configuring packages
@@ -59,50 +75,17 @@
 ;; To get information about any of these functions/macros, move the cursor over
 ;; the highlighted symbol at press 'K' (non-evil users must press 'C-c c k').
 ;; This will open documentation for it, including demos of how they are used.
+;; Alternatively, use `C-h o' to look up a symbol (functions, variables, faces,
+;; etc).
 ;;
 ;; You can also try 'gd' (or 'C-c c d') to jump to their definition and see how
 ;; they are implemented.
-
-
-;; (remove-hook '+doom-dashboard-functions #'doom-dashboard-widget-shortmenu)
-(remove-hook '+doom-dashboard-functions #'doom-dashboard-widget-footer)
-;; (add-hook! '+doom-dashboard-mode-hook (hl-line-mode -1))
-;; (setq-hook! '+doom-dashboard-mode-hook evil-normal-state-cursor (list nil))
 (setq fancy-splash-image (expand-file-name "assets/doom-emacs-gray.svg" doom-user-dir))
-
-
-;; ----------------------------- frame title --------------------------------
-(setq frame-title-format
-  '(""
-    (:eval
-        (replace-regexp-in-string "/home/[^/]+" "🏠 ~" (or buffer-file-name "")))
-        ;; (or buffer-file-name ""))
-      ;; (if (s-contains-p org-roam-directory (or buffer-file-name ""))
-      ;;     (replace-regexp-in-string
-      ;;      ".*/[0-9]*-?" "☰ "
-      ;;      (subst-char-in-string ?_ ?  buffer-file-name))
-      ;;   "%b"))
-    (:eval
-      (let ((project-name (or projectile-project-name (buffer-name) "❓")))
-      (unless (string= "-" project-name)
-      (format (if (buffer-modified-p)  " ⋮ ◯ %s ◯" " ⋮ ● %s ●") project-name))))))
-
-;; for windows, when minimize window
-(setq icon-title-format frame-title-format)
-
-
-;; ----------------------------- emacs >= 28.2 will use italic --------------------------------
-;; (set-face-attribute 'line-number nil :slant 'normal)
-;; (set-face-attribute 'line-number-current-line nil :slant 'normal)
-(use-package! display-line-numbers
-  :custom-face
-  (line-number ((t (:slant normal))))
-  (line-number-current-line ((t (:slant normal)))))
 
 ;; ----------------------------- mouse scroll --------------------------------
 ;; scroll one line at a time (less “jumpy” than defaults)
 ;; (unless (modulep! :ui smooth-scroll)
-  (setq mouse-wheel-scroll-amount '(3 ((shift) . 8))) ;; 3 lines / 8 columns at a time,
+  (setq mouse-wheel-scroll-amount '(4 ((shift) . 8))) ;; 4 lines / 8 columns at a time,
   (setq mouse-wheel-progressive-speed nil) ;; don't accelerate scrolling
   (setq mouse-wheel-follow-mouse t) ;; scroll window under mouse
   (setq mouse-wheel-tilt-scroll t) ;; Enable horizontal scrolling with the second mouse wheel or the touchpad
@@ -118,17 +101,6 @@
 ;; -------------------------------- comment -----------------------------------
 ;; comment mode, positive: block, negative: line
 (add-hook 'c-mode-hook (lambda () (c-toggle-comment-style -1)))
-
-
-;; ----------------------------- input method----------------------------------
-(setq default-input-method "rime"
-      rime-show-candidate 'posframe)
-(setq rime-user-data-dir "~/.config/fcitx/rime")
-(setq rime-posframe-properties
-    (list :font "Maple Mono NF CN"
-       :background-color "#333333"
-       :foreground-color "#dcdccc"
-       :internal-border-width 10))
 
 ;; -------------------------------- ivy --------------------------------------
 ;; avy, 2 char motion
@@ -146,12 +118,6 @@
   (setq ivy-more-chars-alist '((counsel-rg . 2)
                                (counsel-search . 2)
                                (t . 3))))
-
-;; -------------------------------- corfu ------------------------------------
-; don't show current select item as visual text on input area
-(after! corfu
-  (setq corfu-preview-current nil))
-
 ;; ----------------------------- projectile ----------------------------------
 ; don't add projects automatically
 (setq projectile-track-known-projects-automatically nil)
@@ -181,19 +147,10 @@ Otherwise, use `projectile-default-project-name`."
 ;; ------------------------ whitespace-mode has bugs --------------------------
 ;; disbale whitespace-mode
 (advice-add #'doom-highlight-non-default-indentation-h :override #'ignore)
-
-;; ------------------------------ whitespace4r --------------------------------
-(progn
-  (setq show-trailing-whitespace nil)
-  (setq whitespace4r-style '(tabs hspaces zwspaces trailing))
-  (setq whitespace4r-display-mappings `((space-mark      . [?·])
-                                        (hard-space-mark . [?¤])
-                                        (zero-width-space-mark . [?┆])
-                                        (tab-mark        . [?- ?⟶]))))
-;; (add-hook 'prog-mode-hook (lambda () (whitespace4r-mode 1)))
-
 ;; ------------------------ make _ as part of word ----------------------------
 ;; For c
+(add-hook 'c-ts-mode-hook
+          (lambda () (modify-syntax-entry ?_ "w")))
 (add-hook 'c-mode-common-hook
           (lambda () (modify-syntax-entry ?_ "w")))
 ;; For python
@@ -215,30 +172,6 @@ Otherwise, use `projectile-default-project-name`."
     ;; disable lsp code lense (SPC c l T l)
     lsp-lens-enable nil)
   (setq lsp-file-watch-threshold 5000))
-
-(defun decrease-color-value (color valueR valueG valueB)
-  "Decrease each RGB component of COLOR by VALUE."
-  (let* ((r (string-to-number (substring color 1 3) 16))
-         (g (string-to-number (substring color 3 5) 16))
-         (b (string-to-number (substring color 5 7) 16))
-         (new-r (max 0 (- r valueR)))
-         (new-g (max 0 (- g valueG)))
-         (new-b (max 0 (- b valueB))))
-    (format "#%02x%02x%02x" new-r new-g new-b)))
-
-;; lsp-mode breadcrum background
-(after! lsp-mode
-  (if lsp-headerline-breadcrumb-enable
-    (if (equal (car custom-enabled-themes) 'doom-one-light)
-      (progn
-        (custom-set-faces!
-        `(header-line :background ,(decrease-color-value (doom-color 'bg) 10 8 18)))))))
-
-;; resolve Unknown key: :docs-link
-(after! lsp-mode
-  ;; https://github.com/emacs-lsp/lsp-mode/issues/3577#issuecomment-1709232622
-  (delete 'lsp-terraform lsp-client-packages))
-
 ;; ccls
 (after! ccls
   (setq ccls-initialization-options
@@ -246,19 +179,6 @@ Otherwise, use `projectile-default-project-name`."
           :completion (:detailedLabel t)))
   ;; optional as ccls is the default in Doom, if you want to use clangd, let the priority smaller than clangd
   (set-lsp-priority! 'ccls 2))
-
-;; clangd
-;; (after! lsp-clangd
-;;   (setq lsp-clients-clangd-args
-;;         '("--background-index"
-;;           "--clang-tidy"
-;;           "--completion-style=detailed"
-;;           "--header-insertion=never"
-;;           "--header-insertion-decorators=0"))
-;;   (set-lsp-priority! 'clangd 6))
-
-(after! lsp-pyright
-  (setq lsp-pyright-langserver-command "basedpyright-langserver"))
 
 ;; ------------------------------------------ winnum --------------------------------------
 ;; winnum
@@ -314,18 +234,6 @@ Otherwise, use `projectile-default-project-name`."
   (:leader
    :desc "imenu" "e" #'counsel-imenu))
 
-;; --------------------------------------------------------------------------------
-;; set the best font height for different screen resolution: 2K - 100, 4K - 180
-(map! :leader
-      :desc "set font size to adapt 4K"
-      "j 4" #'(lambda () (interactive) (set-face-attribute 'default nil :height 180)))
-(map! :leader
-      :desc "set font size medium"
-      "j 2" #'(lambda () (interactive) (set-face-attribute 'default nil :height 110)))
-(map! :leader
-      :desc "set font size smaller"
-      "j 1" #'(lambda () (interactive) (set-face-attribute 'default nil :height 95)))
-
 ;; Hide ^M
 (defun remove-dos-eol ()
   "Do not show ^M in files containing mixed UNIX and DOS line endings."
@@ -335,7 +243,7 @@ Otherwise, use `projectile-default-project-name`."
 
 (add-hook 'text-mode-hook 'remove-dos-eol)
 (add-hook 'c-mode-common-hook 'remove-dos-eol)
-
+(add-hook 'c-ts-mode-hook 'remove-dos-eol)
 
 
 ;; -----------------------------------------------------------------------------------------
@@ -364,9 +272,11 @@ Otherwise, use `projectile-default-project-name`."
     :desc "previous"        "p"   #'symbol-overlay-jump-prev
     :desc "rename"          "R"   #'symbol-overlay-query-replace))))
 
-
 ;; remap p/c/s without yank
 (after! evil
+  ;; visual line move
+  (define-key evil-motion-state-map "j" 'evil-next-visual-line)
+  (define-key evil-motion-state-map "k" 'evil-previous-visual-line)
   ;; C-h/C-d to delete char on insert state
   (define-key evil-insert-state-map (kbd "C-h") 'evil-delete-backward-char-and-join)
   (define-key evil-insert-state-map (kbd "C-d") 'evil-delete-char)
@@ -401,93 +311,6 @@ Otherwise, use `projectile-default-project-name`."
 ;; ------ jk to escape -------
 (after! evil-escape
   (setq evil-escape-key-sequence "jk"))
-
-;; -----------------------------------------------------------------------------------------
-;; If set to nil or t it will fully disable or fully enable highlighting in every tree sitter enabled language respectively.
-(setq +tree-sitter-hl-enabled-modes t)
-
-;; ------------------------------------- awesome-tray --------------------------------------
-(defun dark/awesome-tray-module-line-char-count-info ()
-  (let* ((total-lines (count-lines (point-min) (point-max)))
-        (start (region-beginning)) (end (region-end))
-        (selected-lines (max 1 (count-lines start end)))
-        (chars (1+ (- end start))))
-    (if (region-active-p)
-        (format "%dC/%dL" chars selected-lines)
-      ;; (format "%dL" total-lines) ;; if you want to see total lines when no selection
-      )))
-
-(defface dark/awesome-tray-module-line-char-count-face
-  '((((background light)) :inherit awesome-tray-blue-bright-face)
-    (t :inherit awesome-tray-blue-bright-face))
-  "line and char count face."
-  :group 'awesome-tray)
-
-
-(use-package! awesome-tray
-  :init
-  (awesome-tray-mode 1)
-  :config
-  (add-hook 'after-change-major-mode-hook #'hide-mode-line-mode)
-  ;; (global-hide-mode-line-mode)
-  (add-to-list 'awesome-tray-module-alist
-    '("line-char" . (dark/awesome-tray-module-line-char-count-info
-                     dark/awesome-tray-module-line-char-count-face)))
-  (setq awesome-tray-active-modules '("anzu" "line-char" "location" "belong" "file-path" "git" "mode-name" "date"))
-  (setq awesome-tray-date-format "%m-%d %H:%M")
-  (setq awesome-tray-git-format "[%s]")
-  (setq awesome-tray-belong-update-duration 1)
-  (setq awesome-tray-location-info-bottom " ↓")
-  (setq awesome-tray-location-info-top " ↑")
-  )
-
-;; -----------------------------------------------------------------------------------------
-;; refer: https://emacs-china.org/t/topic/25992/9
-;; Pulse current line
-(use-package! pulse
-  :ensure nil
-  :custom-face
-  (pulse-highlight-start-face ((t (:inherit region :background unspecified))))
-  (pulse-highlight-face ((t (:inherit region :background unspecified :extend t))))
-  :hook (((dumb-jump-after-jump imenu-after-jump) . my-recenter-and-pulse)
-         ((bookmark-after-jump magit-diff-visit-file next-error) . my-recenter-and-pulse-line))
-  :init
-  (with-no-warnings
-    (defun my-pulse-momentary-line (&rest _)
-      "Pulse the current line."
-      (pulse-momentary-highlight-one-line (point)))
-
-    (defun my-pulse-momentary (&rest _)
-      "Pulse the region or the current line."
-      (if (fboundp 'xref-pulse-momentarily)
-          (xref-pulse-momentarily)
-        (my-pulse-momentary-line)))
-
-    (defun my-recenter-and-pulse(&rest _)
-      "Recenter and pulse the region or the current line."
-      (recenter)
-      (my-pulse-momentary))
-
-    (defun my-recenter-and-pulse-line (&rest _)
-      "Recenter and pulse the current line."
-      (recenter)
-      (my-pulse-momentary-line))
-
-    (dolist (cmd '(recenter-top-bottom
-                   other-window switch-to-buffer
-                   aw-select toggle-window-split
-                   windmove-do-window-select
-                   pager-page-down pager-page-up
-                   treemacs-select-window
-                   symbol-overlay-basic-jump))
-      (advice-add cmd :after #'my-pulse-momentary-line))
-
-    (dolist (cmd '(pop-to-mark-command
-                   pop-global-mark
-                   better-jumper-jump-forward
-                   better-jumper-jump-backward
-                   goto-last-change))
-      (advice-add cmd :after #'my-recenter-and-pulse))))
 
 ;; ------------------------------ vterm for make compile -------------------------------
 (defun get-term-buffer-name()
@@ -549,9 +372,10 @@ Otherwise, use `projectile-default-project-name`."
 
 ;; load .dark.el from project root
 (defun dk-load-cfg-file ()
-  (let* ((project-root (or (doom-project-root) default-directory))
+  (let* ((project-root (or (lsp-workspace-root) (doom-project-root) default-directory))
          ;; (setenv "PROOT" project-root)
          (dk-cfg-path (expand-file-name ".dark.el" project-root)))
+    (message dk-cfg-path)
     (if (file-exists-p dk-cfg-path)
       (let ((inhibit-message t))
         (load-file dk-cfg-path)))))
@@ -707,6 +531,7 @@ Signals an error if there is no current project."
   (advice-add 'magit-merge-plain :after #'dk-syncthing-after-magit)
   (advice-add 'magit-reset-internal :after #'dk-syncthing-after-magit)
   (advice-add 'magit-stash--apply :after #'dk-syncthing-after-magit)
+  (advice-add 'magit-stash-save :after #'dk-syncthing-after-magit)
   (advice-add 'git-rebase-merge :after #'dk-syncthing-after-magit)
   (advice-add 'magit-discard-apply :after #'dk-syncthing-after-magit)
   (advice-add 'magit-discard-files :after #'dk-syncthing-after-magit)
@@ -777,38 +602,116 @@ Signals an error if there is no current project."
       "o o" #'dk-open-in-file-manager)
 
 
-;; 0) cargo install emacs-lsp-booster; doom env; 如有必要，doom sync --rebuild
-;; 1) lsp-mode 启用 plist 解析（Booster 只支持 plist）
-(setq lsp-use-plists t)       ;; Doom 默认为 nil，需要显式改成 t
-;; 2) Booster 的两个 advice
-(after! lsp-mode
-  (defun lsp-booster--advice-json-parse (old-fn &rest args)
-    "Try to parse bytecode instead of json."
-    (or
-     (when (equal (following-char) ?#)
-       (let ((bytecode (read (current-buffer))))
-         (when (byte-code-function-p bytecode)
-           (funcall bytecode))))
-     (apply old-fn args)))
-  (advice-add (if (progn (require 'json)
-                         (fboundp 'json-parse-buffer))
-                  'json-parse-buffer
-                'json-read)
-              :around
-              #'lsp-booster--advice-json-parse)
 
-  (defun lsp-booster--advice-final-command (old-fn cmd &optional test?)
-    "Prepend emacs-lsp-booster command to lsp CMD."
-    (let ((orig-result (funcall old-fn cmd test?)))
-      (if (and (not test?)                             ;; for check lsp-server-present?
-               (not (file-remote-p default-directory)) ;; see lsp-resolve-final-command, it would add extra shell wrapper
-               lsp-use-plists
-               (not (functionp 'json-rpc-connection))  ;; native json-rpc
-               (executable-find "emacs-lsp-booster"))
-          (progn
-            (when-let ((command-from-exec-path (executable-find (car orig-result))))  ;; resolve command from exec-path (in case not found in $PATH)
-              (setcar orig-result command-from-exec-path))
-            (message "Using emacs-lsp-booster for %s!" orig-result)
-            (cons "emacs-lsp-booster" orig-result))
-        orig-result)))
-  (advice-add 'lsp-resolve-final-command :around #'lsp-booster--advice-final-command))
+(map! :map prog-mode-map :gni "TAB"   #'indent-for-tab-command
+      :map prog-mode-map :gni "<tab>" #'indent-for-tab-command)
+
+(after! corfu
+  ;;(setq corfu-auto nil)
+  (setq tab-always-indent t))
+
+(after! tramp
+        (add-to-list 'tramp-remote-path 'tramp-own-remote-path))
+
+
+
+;; ---------------------------------- open sub git repo from list ----------------------------------------------
+
+(defvar my/repo-submodules-cache nil
+  "Cache for discovered git submodules in the project.")
+
+(defvar my/repo-submodules-cache-root nil
+  "Project root for which the cache was generated.")
+
+(defun my/find-git-repos (root-dir &optional max-depth)
+  "Find all git repositories under ROOT-DIR, including nested ones.
+MAX-DEPTH limits how deep to search (default: 5)."
+  (let ((max-depth (or max-depth 5))
+        (repos '()))
+    (cl-labels ((scan-dir (dir depth)
+                  (when (<= depth max-depth)
+                    (let ((git-dir (expand-file-name ".git" dir)))
+                      ;; 如果找到 git 仓库，添加到列表
+                      (when (file-exists-p git-dir)
+                        (push (file-relative-name dir root-dir) repos)))
+                    ;; 继续扫描子目录（即使当前目录是 git 仓库）
+                    (dolist (file (directory-files dir t))
+                      (when (and (file-directory-p file)
+                                 (not (string-match-p "/\\.\\.?$" file)) ; 排除 . 和 ..
+                                 (not (string-match-p "/\\.git$" file)) ; 排除 .git 目录
+                                 (not (string-match-p "/\\.repo$" file)) ; 排除 .repo 目录
+                                 ;; 排除常见大目录
+                                 (not (string-match-p "/node_modules$" file))
+                                 (not (string-match-p "/build$" file))
+                                 (not (string-match-p "/dist$" file))
+                                 (not (string-match-p "/target$" file))
+                                 (not (string-match-p "/vendor$" file))
+                                 (not (string-match-p "/\\.cache$" file))
+                                 (not (string-match-p "/\\.ccls-cache$" file))
+                                 (not (string-match-p "/\\.xmake$" file))
+                                 (not (string-match-p "/\\.gradle$" file))
+                                 (not (string-match-p "/\\.idea$" file))
+                                 (not (string-match-p "/out$" file)))
+                        (scan-dir file (1+ depth)))))))
+      (scan-dir root-dir 0))
+    (sort repos #'string<)))
+
+(defun my/get-project-root ()
+  "Get the project root directory."
+  (or (doom-project-root)
+      (and (fboundp 'lsp-workspace-root) (lsp-workspace-root))
+      default-directory))
+
+(defun my/refresh-repo-submodules-cache ()
+  "Scan and refresh the cache of git submodules."
+  (interactive)
+  (let ((root (my/get-project-root)))
+    (message "Scanning for git repositories in %s..." root)
+    (setq my/repo-submodules-cache (my/find-git-repos root))
+    (setq my/repo-submodules-cache-root root)
+    (message "Found %d git repositories" (length my/repo-submodules-cache))
+    my/repo-submodules-cache))
+
+(defun my/get-repo-submodules (&optional force-refresh)
+  "Get list of git submodules, using cache if available.
+With FORCE-REFRESH or when project root changes, rescan the directory."
+  (let ((current-root (my/get-project-root)))
+    (when (or force-refresh
+              (null my/repo-submodules-cache)
+              (not (equal current-root my/repo-submodules-cache-root)))
+      (my/refresh-repo-submodules-cache)))
+  my/repo-submodules-cache)
+
+(defun my/magit-status-submodule--action (submodule)
+  "Open magit-status for SUBMODULE."
+  (let* ((project-root (my/get-project-root))
+         (full-path (expand-file-name submodule project-root)))
+    (if (file-directory-p full-path)
+        (magit-status full-path)
+      (user-error "Directory not found: %s" full-path))))
+
+(defun my/magit-status-submodule ()
+  "Select a git submodule using ivy and open its magit-status.
+Supports ivy-resume."
+  (interactive)
+  (let* ((project-root (my/get-project-root))
+         (submodules (my/get-repo-submodules)))
+    (if submodules
+        (ivy-read "Select git repository: "
+                  submodules
+                  :require-match t
+                  :action #'my/magit-status-submodule--action
+                  :caller 'my/magit-status-submodule)
+      (user-error "No git repositories found in %s" project-root))))
+
+(defun my/magit-status-submodule-refresh ()
+  "Refresh cache and select a git submodule."
+  (interactive)
+  (my/refresh-repo-submodules-cache)
+  (my/magit-status-submodule))
+
+;; 按键绑定
+(map! :leader
+      (:prefix ("g" . "git")
+       :desc "Open repo list" "a" #'my/magit-status-submodule
+       :desc "Refresh & select repo" "A" #'my/magit-status-submodule-refresh))
