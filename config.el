@@ -873,3 +873,30 @@ Works with Ivy if available, otherwise falls back to completing-read."
   (advice-add 'lsp--render-element :filter-return #'my/eldoc-add-hex-value))
 
 
+
+
+
+
+(defun my/copy-syncthing-path ()
+  "将当前文件路径转换为 Windows 格式并复制到剪贴板。
+如果 syncthing-folder-id 变量有值，将 /home/dark 替换为 d:，
+并将路径分隔符转换为 Windows 格式。"
+  (interactive)
+  (if (and (boundp 'syncthing-folder-id) syncthing-folder-id)
+      (let* ((file-path (buffer-file-name))
+             (converted-path (if file-path
+                                (progn
+                                  ;; 替换 /home/dark 为 d:
+                                  (setq file-path (replace-regexp-in-string "^/home/dark" "d:" file-path))
+                                  ;; 将 / 替换为 \
+                                  (replace-regexp-in-string "/" "\\\\" file-path))
+                              nil)))
+        (if converted-path
+            (progn
+              (kill-new converted-path)
+              (message "已复制到剪贴板: %s" converted-path))
+          (message "当前 buffer 没有关联的文件")))
+    (message "syncthing-folder-id 未设置")))
+
+(map! :leader
+      :desc "Copy file path for win" "o c" #'my/copy-syncthing-path)
