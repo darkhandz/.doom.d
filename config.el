@@ -128,7 +128,47 @@
   ; to avoid one char triggered counsel-rg
   (setq ivy-more-chars-alist '((counsel-rg . 2)
                                (counsel-search . 2)
-                               (t . 3))))
+                               (t . 3)))
+
+  ;; Use the current candidate list for woccur after `ivy-restrict-to-matches'.
+  (defun dk/ivy--occur-from-cands (cands)
+    "Insert grep-like CANDS into an ivy-occur-grep buffer."
+    (require 'counsel)
+    (require 'swiper)
+    (ivy-occur-grep-mode)
+    (setq default-directory (or (ivy-state-directory ivy-last) default-directory))
+    (swiper--occur-insert-lines
+     (mapcar #'counsel--normalize-grep-match cands)))
+
+  (defun dk/ivy--woccur-use-cands-a (orig-fn &rest args)
+    "Use current candidates for woccur when collection is no longer dynamic."
+    (let* ((caller (ivy-state-caller ivy-last))
+           (grep-callers '(counsel-rg counsel-ag counsel-pt counsel-ack
+                            counsel-grep counsel-git-grep))
+           (use-cands (and (window-minibuffer-p)
+                           (not (ivy-state-dynamic-collection ivy-last))
+                           (memq caller grep-callers)
+                           ivy--old-cands)))
+      (if (not use-cands)
+          (apply orig-fn args)
+        (require 'wgrep)
+        (let ((buffer (generate-new-buffer
+                       (format "*ivy-occur%s \"%s\"*"
+                               (if caller (concat " " (prin1-to-string caller)) "")
+                               ivy-text))))
+          (with-current-buffer buffer
+            (let ((inhibit-read-only t))
+              (erase-buffer)
+              (dk/ivy--occur-from-cands ivy--old-cands))
+            (setf (ivy-state-text ivy-last) ivy-text)
+            (setq ivy-occur-last ivy-last)
+            (setq-local ivy--directory ivy--directory))
+          (ivy-exit-with-action
+           `(lambda (_)
+              (pop-to-buffer ,buffer)
+              (ivy-wgrep-change-to-wgrep-mode)))))))
+
+  (advice-add #'+ivy/woccur :around #'dk/ivy--woccur-use-cands-a))
 ;; ----------------------------- projectile ----------------------------------
 ; don't add projects automatically
 (setq projectile-track-known-projects-automatically nil)
