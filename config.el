@@ -226,6 +226,12 @@ Otherwise, use `projectile-default-project-name`."
     :desc "Switch to window 8" :n "8" #'winum-select-window-8
     :desc "Switch to window 9" :n "9" #'winum-select-window-9))
 
+;; SPC w i to delete other windows
+(map!
+ (:leader
+    :desc "delete other windows" :n "w i" #'delete-other-windows))
+
+
 ;; ----------------------------------------------------------------------------
 ;; magit show detail datetime instead of relative time
 (after! magit
