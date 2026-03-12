@@ -783,3 +783,20 @@ Works with Ivy if available, otherwise falls back to completing-read."
       :desc "Find all files (ignore rules)"
       "_" #'+projectile-find-file-all)
 
+
+
+;; ivy 显示的workspace buffer里有太多无用的列了，这里只留文件名和路径
+(after! ivy-rich
+  (plist-put! ivy-rich-display-transformers-list
+              'ivy-switch-buffer
+              '(:columns
+                ((ivy-switch-buffer-transformer (:width 0.45))  ; buffer 名 + 图标
+                 ;; 注释掉下面三行 → 去掉 size/major-mode/project
+                 ;; (ivy-rich-switch-buffer-size (:width 7))
+                 ;; (ivy-rich-switch-buffer-major-mode (:width 12 :face warning))
+                 ;; (ivy-rich-switch-buffer-project (:width 0.18 :face success))
+                 (ivy-rich-switch-buffer-indicators (:width 4 :face error :align right))
+                 (ivy-rich-switch-buffer-path
+                  (:width (lambda (x) (ivy-rich-switch-buffer-shorten-path x (ivy-rich-minibuffer-width 0.3))))))
+                :delimiter "  ")))
+
