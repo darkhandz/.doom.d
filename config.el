@@ -738,3 +738,13 @@ Supports ivy-resume."
       (:prefix ("g" . "git")
        :desc "Open repo list" "a" #'my/magit-status-submodule
        :desc "Refresh & select repo" "A" #'my/magit-status-submodule-refresh))
+
+
+
+;; ------------------------- 切换workspace时重新加载.dark.el --------------------
+(defun my/workspace-switch-hook (&rest _)
+  (run-with-idle-timer 0.3 nil #'dk-load-cfg-file))
+
+;; advice workspace 切换函数
+(advice-add '+workspace/switch-to :after #'my/workspace-switch-hook)
+
