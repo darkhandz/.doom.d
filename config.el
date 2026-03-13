@@ -168,7 +168,24 @@
               (pop-to-buffer ,buffer)
               (ivy-wgrep-change-to-wgrep-mode)))))))
 
-  (advice-add #'+ivy/woccur :around #'dk/ivy--woccur-use-cands-a))
+  (advice-add #'+ivy/woccur :around #'dk/ivy--woccur-use-cands-a)
+
+  ;; Avoid selected candidates getting saved into history after `ivy-done`.
+  ;; Ivy already updates history itself; we disable the minibuffer's own
+  ;; history insertion for grep/search/file-jump callers so only the input remains.
+  (defun dk/ivy--read-no-minibuffer-history-a (orig-fn prompt collection &rest args)
+    "Disable `read-from-minibuffer' history insertion for grep-like callers."
+    (let* ((caller (plist-get args :caller))
+           (no-minibuffer-history-callers
+            '(counsel-rg counsel-ag counsel-pt counsel-ack
+              counsel-grep counsel-git-grep
+              counsel-projectile-find-file counsel-projectile-find-file-dwim
+              counsel-file-jump)))
+      (if (memq caller no-minibuffer-history-callers)
+          (let ((history-add-new-input nil))
+            (apply orig-fn prompt collection args))
+        (apply orig-fn prompt collection args))))
+  (advice-add #'ivy-read :around #'dk/ivy--read-no-minibuffer-history-a))
 ;; ----------------------------- projectile ----------------------------------
 ; don't add projects automatically
 (setq projectile-track-known-projects-automatically nil)
