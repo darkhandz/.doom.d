@@ -172,20 +172,42 @@
 
   ;; Avoid selected candidates getting saved into history after `ivy-done`.
   ;; Ivy already updates history itself; we disable the minibuffer's own
-  ;; history insertion for grep/search/file-jump callers so only the input remains.
+  ;; history insertion for search-like callers so only the input remains.
+  (defvar dk/ivy-no-minibuffer-history-callers
+    '(counsel-projectile-find-file counsel-projectile-find-file-dwim
+      counsel-file-jump counsel-fzf counsel-locate counsel-search
+      ivy-xref-show-xrefs dumb-jump-ivy-jump-to-selected
+      swiper swiper-isearch swiper-all swiper-multi swiper-query-replace)
+    "Ivy callers that should not push the selected candidate into history.")
+
   (defun dk/ivy--read-no-minibuffer-history-a (orig-fn prompt collection &rest args)
-    "Disable `read-from-minibuffer' history insertion for grep-like callers."
+    "Disable `read-from-minibuffer' history insertion for search-like callers."
     (let* ((caller (plist-get args :caller))
-           (no-minibuffer-history-callers
-            '(counsel-rg counsel-ag counsel-pt counsel-ack
-              counsel-grep counsel-git-grep
-              counsel-projectile-find-file counsel-projectile-find-file-dwim
-              counsel-file-jump)))
-      (if (memq caller no-minibuffer-history-callers)
+           (grep-like
+            (and (boundp 'ivy-highlight-grep-commands)
+                 (memq caller ivy-highlight-grep-commands)))
+           (extra (memq caller dk/ivy-no-minibuffer-history-callers)))
+      (if (or grep-like extra)
           (let ((history-add-new-input nil))
             (apply orig-fn prompt collection args))
         (apply orig-fn prompt collection args))))
-  (advice-add #'ivy-read :around #'dk/ivy--read-no-minibuffer-history-a))
+  (advice-add #'ivy-read :around #'dk/ivy--read-no-minibuffer-history-a)
+
+  (defun dk/ivy--update-history-a (orig-fn hist)
+    "Only record non-empty input for search-like callers."
+    (let* ((caller (ivy-state-caller ivy-last))
+           (grep-like
+            (and (boundp 'ivy-highlight-grep-commands)
+                 (memq caller ivy-highlight-grep-commands)))
+           (extra (memq caller dk/ivy-no-minibuffer-history-callers)))
+      (if (or grep-like extra)
+          (unless (eq hist t)
+            (when (and (stringp ivy-text) (> (length ivy-text) 0))
+              (let ((history-delete-duplicates t))
+                (add-to-history
+                 hist (propertize ivy-text 'ivy-index ivy--index)))))
+        (funcall orig-fn hist))))
+  (advice-add #'ivy--update-history :around #'dk/ivy--update-history-a))
 ;; ----------------------------- projectile ----------------------------------
 ; don't add projects automatically
 (setq projectile-track-known-projects-automatically nil)
