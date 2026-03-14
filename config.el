@@ -331,12 +331,21 @@ Otherwise, use `projectile-default-project-name`."
   (when (use-region-p)
     (er/contract-region 1)))
 
+;; Recenter point to top + 4 lines (line 5 from top).
+(defun +my/recenter-top-plus-5 ()
+  "Recenter window so current line is 5th from top."
+  (interactive)
+  (recenter 5))
+
 ;; Backspace to expand region (word -> larger units)
 (map! :n [backspace] #'er/expand-region
       :v [backspace] #'er/expand-region)
 
 ;; Delete to contract region when selection exists
 (map! :nv [delete] #'+my/contract-region-maybe)
+
+;; Enter to recenter current line to top + n in normal state
+(map! :n "RET" #'+my/recenter-top-plus-5)
 
 ;; SPC [ / ] for version control hunk navigation
 (map!
