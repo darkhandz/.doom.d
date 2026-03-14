@@ -324,6 +324,20 @@ Otherwise, use `projectile-default-project-name`."
   :desc "Next buffer" "l" #'next-buffer
   :desc "Previous buffer" "k" #'previous-buffer))
 
+;; Contract selection only when a region is active (avoid accidental deletes).
+(defun +my/contract-region-maybe ()
+  "Contract active region if present; otherwise do nothing."
+  (interactive)
+  (when (use-region-p)
+    (er/contract-region 1)))
+
+;; Backspace to expand region (word -> larger units)
+(map! :n [backspace] #'er/expand-region
+      :v [backspace] #'er/expand-region)
+
+;; Delete to contract region when selection exists
+(map! :nv [delete] #'+my/contract-region-maybe)
+
 ;; SPC [ / ] for version control hunk navigation
 (map!
  (:leader
