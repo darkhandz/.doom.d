@@ -48,6 +48,35 @@
 ;; change `org-directory'. It must be set before org loads!
 (setq org-directory "~/org/")
 
+;; ----------------------- frame geometry persistence ------------------------
+;; Restore last frame size/position on startup, save on exit.
+(defvar my/frame-geometry-file (expand-file-name "frame-geometry.el" doom-cache-dir))
+
+(defun my/save-frame-geometry ()
+  "Persist current GUI frame position/size."
+  (when (display-graphic-p)
+    (with-temp-file my/frame-geometry-file
+      (let ((frame (selected-frame)))
+        (prin1
+         `((top . ,(frame-parameter frame 'top))
+           (left . ,(frame-parameter frame 'left))
+           (width . ,(frame-parameter frame 'width))
+           (height . ,(frame-parameter frame 'height))
+           (fullscreen . ,(frame-parameter frame 'fullscreen)))
+         (current-buffer))))))
+
+(defun my/restore-frame-geometry ()
+  "Restore GUI frame position/size from last session."
+  (when (and (display-graphic-p)
+             (file-exists-p my/frame-geometry-file))
+    (with-temp-buffer
+      (insert-file-contents my/frame-geometry-file)
+      (let ((params (read (current-buffer))))
+        (modify-frame-parameters (selected-frame) params)))))
+
+(add-hook 'kill-emacs-hook #'my/save-frame-geometry)
+(add-hook 'window-setup-hook #'my/restore-frame-geometry)
+
 
 ;; Whenever you reconfigure a package, make sure to wrap your config in an
 ;; `after!' block, otherwise Doom's defaults may override your settings. E.g.
