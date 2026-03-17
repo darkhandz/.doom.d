@@ -524,14 +524,30 @@ Otherwise, use `projectile-default-project-name`."
     (+vterm/toggle nil))
 
 
-;; load .dark.el from project root
+;; load .dark.el from project root or its immediate subdirectories
+(defun my/find-project-file (root filename)
+  "Find FILENAME in ROOT or its immediate subdirectories.
+Returns the full path if found, otherwise nil."
+  (when (and root (file-directory-p root))
+    (let ((root-file (expand-file-name filename root)))
+      (if (file-exists-p root-file)
+          root-file
+        (catch 'found
+          (dolist (entry (directory-files root t))
+            (when (and (file-directory-p entry)
+                       (not (member (file-name-nondirectory entry) '("." ".."))))
+              (let ((candidate (expand-file-name filename entry)))
+                (when (file-exists-p candidate)
+                  (throw 'found candidate)))))
+          nil)))))
+
 (defun dk-load-cfg-file ()
-"静默加载项目根目录的 .dark.el，且不干扰 minibuffer 显示"
+"静默加载项目根目录或其一层子目录的 .dark.el，且不干扰 minibuffer 显示"
   (let* ((project-root (or (when (bound-and-true-p lsp-mode)
                              (lsp-workspace-root))
                            (doom-project-root)
                            default-directory))
-         (dk-cfg-path (expand-file-name ".dark.el" project-root)))
+         (dk-cfg-path (my/find-project-file project-root ".dark.el")))
     (when (and dk-cfg-path (file-exists-p dk-cfg-path))
       ;; 关键：不产生任何 message，避免覆盖 workspace tabline
       (let ((inhibit-message t)
@@ -871,37 +887,37 @@ Supports ivy-resume."
 
 
 
-;; Open .ignore in current project root
+;; Open .ignore in current project root or its immediate subdirectories
 (defun my/open-project-ignore ()
-  "Open .ignore in the current project root, or message if missing."
+  "Open .ignore in the current project root or its immediate subdirectories."
   (interactive)
   (let* ((root (or (doom-project-root)
                    (and (fboundp 'projectile-project-root)
                         (projectile-project-root))))
-         (ignore-file (and root (expand-file-name ".ignore" root))))
+         (ignore-file (and root (my/find-project-file root ".ignore"))))
     (cond
      ((not root)
       (message "No project root found"))
      ((file-exists-p ignore-file)
      (find-file ignore-file))
      (t
-      (message "No .ignore found in %s" root)))))
+      (message "No .ignore found in %s (or its immediate subdirectories)" root)))))
 
-;; Open .dark.el in current project root
+;; Open .dark.el in current project root or its immediate subdirectories
 (defun my/open-project-dark ()
-  "Open .dark.el in the current project root, or message if missing."
+  "Open .dark.el in the current project root or its immediate subdirectories."
   (interactive)
   (let* ((root (or (doom-project-root)
                    (and (fboundp 'projectile-project-root)
                         (projectile-project-root))))
-         (dark-file (and root (expand-file-name ".dark.el" root))))
+         (dark-file (and root (my/find-project-file root ".dark.el"))))
     (cond
      ((not root)
       (message "No project root found"))
      ((file-exists-p dark-file)
       (find-file dark-file))
      (t
-      (message "No .dark.el found in %s" root)))))
+      (message "No .dark.el found in %s (or its immediate subdirectories)" root)))))
 
 ;; 按键绑定
 (map! :leader
