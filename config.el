@@ -132,6 +132,11 @@
 (add-hook 'c-mode-hook (lambda () (c-toggle-comment-style -1)))
 (add-hook 'c-ts-mode-hook (lambda () (c-ts-mode-toggle-comment-style -1)))
 
+;; Use C-' for comment toggling.
+(map! :gi "C-'" #'comment-line
+      :n  "C-'" #'evilnc-comment-or-uncomment-lines
+      :v  "C-'" #'evilnc-comment-operator)
+
 ;; --------------------------------- indent -----------------------------------
 ;; 设置 c-ts-mode 默认缩进为 4 空格
 ;; 项目中的 .editorconfig 或 .dir-locals.el 仍会覆盖此设置
