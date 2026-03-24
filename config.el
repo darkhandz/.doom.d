@@ -261,6 +261,30 @@ Otherwise, use `projectile-default-project-name`."
     (projectile-default-project-name project-root)))
 (setq projectile-project-name-function 'dk-workspace-name-fun)
 
+(defun dk-frame-title-context ()
+  "Return the workspace or project name shown in the frame title."
+  (let ((workspace-name (when (fboundp '+workspace-current-name)
+                          (+workspace-current-name))))
+    (cond
+     ;; Treat Doom's default main workspace like an unnamed workspace here.
+     ((and (stringp workspace-name)
+           (not (equal workspace-name ""))
+           (not (and (boundp '+workspaces-main)
+                     (string= workspace-name +workspaces-main))))
+      workspace-name)
+     ((when-let* ((project-name (and (fboundp 'doom-project-name)
+                                     (doom-project-name)))
+                  ((not (string= project-name "-"))))
+        project-name))
+     ((when-let* ((root (or (and (fboundp 'doom-project-root)
+                                 (doom-project-root))
+                            default-directory)))
+        (file-name-nondirectory (directory-file-name root))))
+     ("Emacs"))))
+
+(setq frame-title-format '("%b - " (:eval (dk-frame-title-context)))
+      icon-title-format frame-title-format)
+
 ;; -------------------------------- avy --------------------------------------
 ;; make avy works across all visible windows
 (setq avy-all-windows t)
