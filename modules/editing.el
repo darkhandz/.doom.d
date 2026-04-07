@@ -37,6 +37,19 @@
 (add-hook 'c-mode-common-hook #'dk-remove-dos-eol)
 (add-hook 'c-ts-mode-hook #'dk-remove-dos-eol)
 
+(defconst dk-undo-fu-session-max-file-size (* 512 1024)
+  "Maximum file size, in bytes, for persistent undo session recovery.")
+
+(defun dk-undo-fu-session-ignore-large-files-p (filepath)
+  "Return non-nil when FILEPATH is too large for `undo-fu-session'."
+  (when-let* ((attrs (file-attributes filepath 'integer))
+              (size (file-attribute-size attrs)))
+    (> size dk-undo-fu-session-max-file-size)))
+
+(after! undo-fu-session
+  (add-to-list 'undo-fu-session-incompatible-files
+               #'dk-undo-fu-session-ignore-large-files-p))
+
 (map! :map prog-mode-map
       :gni "TAB" #'indent-for-tab-command
       :gni "<tab>" #'indent-for-tab-command)
