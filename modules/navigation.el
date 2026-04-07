@@ -23,9 +23,13 @@
 
 ;; Make Treemacs accessible as window 0.
 (after! (treemacs winum)
-  (setq winum-ignored-buffers-regexp
-        (delete (regexp-quote (format "%sFramebuffer-" treemacs--buffer-name-prefix))
-                winum-ignored-buffers-regexp)))
+  (when-let* ((prefix (or (and (boundp 'treemacs-buffer-name-prefix)
+                               treemacs-buffer-name-prefix)
+                          (and (boundp 'treemacs--buffer-name-prefix)
+                               treemacs--buffer-name-prefix))))
+    (setq winum-ignored-buffers-regexp
+          (delete (regexp-quote (format "%sFramebuffer-" prefix))
+                  winum-ignored-buffers-regexp))))
 
 (map!
  (:leader
