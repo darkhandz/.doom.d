@@ -62,6 +62,33 @@
   (advice-add #'c-ts-mode--font-lock-settings
               :around #'dk-c-ts-sanitize-font-lock-settings-a))
 
+;; Emacs 30.2 rejects the builtin font-lock query shipped in `lua-ts-mode'
+;; on this runtime. Replace just that feature with a Lisp-side matcher.
+(with-eval-after-load 'lua-ts-mode
+  (defun dk-lua-ts-fontify-builtin (node override start end &rest _)
+    "Fontify NODE as a Lua builtin when it matches `lua-ts--builtins'."
+    (let ((node-start (treesit-node-start node))
+          (node-end (treesit-node-end node)))
+      (when (and (>= node-start start)
+                 (<= node-end end)
+                 (member (treesit-node-text node t) lua-ts--builtins))
+        (treesit-fontify-with-override
+         node-start node-end font-lock-builtin-face override))))
+
+  (defun dk-lua-ts-safe-builtin-settings ()
+    "Return predicate-free builtin font-lock rules for `lua-ts-mode'."
+    (treesit-font-lock-rules
+     :language 'lua
+     :feature 'builtin
+     '((identifier) @dk-lua-ts-fontify-builtin)))
+
+  (setq lua-ts--font-lock-settings
+        (cl-loop for setting in lua-ts--font-lock-settings
+                 for feature = (nth 2 setting)
+                 append (if (eq feature 'builtin)
+                            (dk-lua-ts-safe-builtin-settings)
+                          (list setting)))))
+
 (defun dk-c-so-long-keep-major-mode ()
   "Keep C-family major modes when `so-long' handles long lines."
   (setq-local so-long-action 'so-long-minor-mode)
