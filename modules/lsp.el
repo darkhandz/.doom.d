@@ -2,6 +2,7 @@
 
 (after! lsp-mode
   (setq lsp-headerline-breadcrumb-enable t
+        lsp-headerline-breadcrumb-icons-enable nil
         lsp-headerline-breadcrumb-enable-diagnostics nil
         lsp-ui-sideline-show-hover t
         lsp-lens-enable nil
