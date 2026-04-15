@@ -196,6 +196,80 @@
       :desc "Browse in file manager"
       "o o" #'dk-open-in-file-manager)
 
+
+(defvar dk-bcompare-temp-files nil
+  "Temporary files created for Beyond Compare buffer diffs.")
+
+(defun dk-bcompare--sanitize-name (name)
+  "Return a filesystem-safe string derived from NAME."
+  (replace-regexp-in-string "[^[:alnum:]._+-]+" "_" name))
+
+(defun dk-bcompare--buffer-temp-file (buffer)
+  "Write BUFFER contents to a temporary file and return its path."
+  (with-current-buffer buffer
+    (let* ((base-name (dk-bcompare--sanitize-name (buffer-name buffer)))
+           (source-file (buffer-file-name buffer))
+           (ext (or (and source-file
+                         (file-name-extension source-file t))
+                    ""))
+           (temp-file (make-temp-file (format "bcompare-%s-" base-name) nil ext)))
+      (write-region nil nil temp-file nil 'silent)
+      (push temp-file dk-bcompare-temp-files)
+      temp-file)))
+
+(defun dk-bcompare--buffer-path (buffer)
+  "Return a path for BUFFER suitable for Beyond Compare.
+
+Use the real file path when BUFFER visits a file.
+Otherwise, write the current buffer contents to a temporary file."
+  (with-current-buffer buffer
+    (if buffer-file-name
+        buffer-file-name
+      (dk-bcompare--buffer-temp-file buffer))))
+
+(defun dk-bcompare-cleanup-temp-files ()
+  "Delete temporary files created for Beyond Compare buffer diffs."
+  (interactive)
+  (setq dk-bcompare-temp-files
+        (seq-filter
+         (lambda (file)
+           (when (file-exists-p file)
+             (delete-file file))
+           nil)
+         dk-bcompare-temp-files)))
+
+(defun dk-bcompare-buffers (buf-a buf-b)
+  "Select two buffers and compare them with Beyond Compare."
+  (interactive
+   (let* ((current (buffer-name (current-buffer)))
+          (other (buffer-name (other-buffer (current-buffer) t)))
+          (buf-a (read-buffer "Buffer A: " current t))
+          (buf-b (read-buffer "Buffer B: " other t)))
+     (list buf-a buf-b)))
+  (let ((bcompare (or (executable-find "bcompare")
+                      (user-error "Cannot find `bcompare` in PATH")))
+        (buffer-a (get-buffer buf-a))
+        (buffer-b (get-buffer buf-b)))
+    (unless buffer-a
+      (user-error "Buffer does not exist: %s" buf-a))
+    (unless buffer-b
+      (user-error "Buffer does not exist: %s" buf-b))
+    (let ((file-a (dk-bcompare--buffer-path buffer-a))
+          (file-b (dk-bcompare--buffer-path buffer-b)))
+      (start-process
+       (format "bcompare-%s-%s" (buffer-name buffer-a) (buffer-name buffer-b))
+       nil
+       bcompare
+       file-a
+       file-b)
+      (message "Beyond Compare: %s <-> %s" (buffer-name buffer-a) (buffer-name buffer-b)))))
+
+(add-hook 'kill-emacs-hook #'dk-bcompare-cleanup-temp-files)
+
+(map! :leader
+      :desc "Compare buffers with Beyond Compare"
+      "o b" #'dk-bcompare-buffers)
+
 (after! tramp
   (add-to-list 'tramp-remote-path 'tramp-own-remote-path))
 
