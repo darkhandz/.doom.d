@@ -8,6 +8,7 @@
 (setq doom-font (font-spec :family "Maple Mono NF CN" :size 18 :weight 'semi-bold)
       doom-symbol-font (font-spec :family "Maple Mono NF CN")
       doom-theme 'doom-one-light
+      doom-themes-enable-italic nil
       display-line-numbers-type t
       fancy-splash-image (expand-file-name "assets/doom-emacs-gray.svg" doom-user-dir))
 
