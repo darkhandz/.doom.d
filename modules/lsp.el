@@ -14,6 +14,59 @@
           :completion (:detailedLabel t)))
   (set-lsp-priority! 'ccls 2))
 
+(defun dk-forward-defun ()
+  "Jump to the beginning of the next defun."
+  (interactive)
+  (beginning-of-defun -1))
+
+(defun dk-backward-defun ()
+  "Jump to the beginning of the previous defun."
+  (interactive)
+  (beginning-of-defun 1))
+
+(defmacro dk-structural-nav-bindings-for-map! (keymap)
+  "Install structural navigation bindings into KEYMAP."
+  `(map! :map ,keymap
+         :n "C-h" (cmd! (beginning-of-defun))
+         :n "C-j" #'dk-forward-defun
+         :n "C-k" #'dk-backward-defun
+         :n "C-l" (cmd! (end-of-defun))))
+
+(after! c-ts-mode
+  (dk-structural-nav-bindings-for-map! c-ts-mode-map))
+
+(after! c++-ts-mode
+  (dk-structural-nav-bindings-for-map! c++-ts-mode-map))
+
+(after! python-ts-mode
+  (dk-structural-nav-bindings-for-map! python-ts-mode-map))
+
+(after! js
+  (when (boundp 'js-ts-mode-map)
+    (dk-structural-nav-bindings-for-map! js-ts-mode-map)))
+
+(after! typescript-ts-mode
+  (dk-structural-nav-bindings-for-map! typescript-ts-mode-map)
+  (when (boundp 'tsx-ts-mode-map)
+    (dk-structural-nav-bindings-for-map! tsx-ts-mode-map)))
+
+(after! css-mode
+  (when (boundp 'css-ts-mode-map)
+    (dk-structural-nav-bindings-for-map! css-ts-mode-map)))
+
+(after! sh-script
+  (when (boundp 'bash-ts-mode-map)
+    (dk-structural-nav-bindings-for-map! bash-ts-mode-map)))
+
+(after! json-ts-mode
+  (dk-structural-nav-bindings-for-map! json-ts-mode-map))
+
+(after! yaml-ts-mode
+  (dk-structural-nav-bindings-for-map! yaml-ts-mode-map))
+
+(after! toml-ts-mode
+  (dk-structural-nav-bindings-for-map! toml-ts-mode-map))
+
 (defun dk-format-hex-padded (num)
   "Format NUM as an even-length lowercase hexadecimal string."
   (let* ((hex (format "%x" num))
