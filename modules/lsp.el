@@ -8,6 +8,23 @@
         lsp-lens-enable nil
         lsp-file-watch-threshold 5000))
 
+(defun dk/lsp-use-treesit-imenu-maybe ()
+  "Prefer tree-sitter Imenu in tree-sitter major modes."
+  (when-let ((fn (and (derived-mode-p 'c-ts-base-mode
+                                      'python-ts-mode
+                                      'js-ts-mode
+                                      'typescript-ts-base-mode
+                                      'css-ts-mode
+                                      'bash-ts-mode
+                                      'json-ts-mode
+                                      'yaml-ts-mode
+                                      'toml-ts-mode)
+                      (fboundp 'dk/treesit-imenu-create-index-function)
+                      (dk/treesit-imenu-create-index-function))))
+    (setq-local imenu-create-index-function fn)))
+
+(add-hook 'lsp-managed-mode-hook #'dk/lsp-use-treesit-imenu-maybe)
+
 (after! ccls
   (setq ccls-initialization-options
         '(:index (:comments 2)
