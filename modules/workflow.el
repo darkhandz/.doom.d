@@ -145,6 +145,14 @@
   (advice-add #'magit-reverse-files :after #'dk-syncthing-after-magit)
   (advice-add #'magit-apply-patch :after #'dk-syncthing-after-magit))
 
+(after! evil-collection-magit
+  ;; `magit-diff-visit-file' enables `magit-blob-mode', whose local map binds
+  ;; `n' to blob navigation. Keep navigation on `gj' / `gk' and restore Evil's
+  ;; search repeat keys on `n' / `N'.
+  (map! :map magit-blob-mode-map
+        :nm "n" #'evil-ex-search-next
+        :nm "N" #'evil-ex-search-previous))
+
 (defun dk-open-file-in-explorer ()
   "Open the current file in Explorer, selecting it when possible."
   (interactive)
