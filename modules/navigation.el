@@ -67,6 +67,9 @@
       :nv [delete] #'dk-contract-region-maybe
       :n "RET" #'dk-recenter-top-plus-5)
 
+(map! :n "C-." #'+vc-gutter/next-hunk
+      :n "C-," #'+vc-gutter/previous-hunk)
+
 (map! (:leader
        :desc "vc next hunk" "]" #'+vc-gutter/next-hunk
        :desc "vc next hunk" "\\" #'+vc-gutter/next-hunk
