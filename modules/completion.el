@@ -101,4 +101,5 @@
                 :delimiter "  ")))
 
 (after! corfu
-  (setq tab-always-indent t))
+  (setq tab-always-indent t
+        +corfu-want-tab-prefer-navigating-snippets t))

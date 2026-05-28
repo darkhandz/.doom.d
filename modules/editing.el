@@ -169,9 +169,20 @@
   (add-to-list 'undo-fu-session-incompatible-files
                #'dk-undo-fu-session-ignore-large-files-p))
 
+(defun dk-indent-or-yas-field ()
+  "Indent, or jump to the next active yasnippet field."
+  (interactive)
+  (if (and (bound-and-true-p yas-minor-mode)
+           (bound-and-true-p yas--active-field-overlay)
+           (overlayp yas--active-field-overlay)
+           (overlay-buffer yas--active-field-overlay)
+           (fboundp 'yas-next-field-or-maybe-expand))
+      (call-interactively #'yas-next-field-or-maybe-expand)
+    (call-interactively #'indent-for-tab-command)))
+
 (map! :map prog-mode-map
-      :gni "TAB" #'indent-for-tab-command
-      :gni "<tab>" #'indent-for-tab-command)
+      :gni "TAB" #'dk-indent-or-yas-field
+      :gni "<tab>" #'dk-indent-or-yas-field)
 
 (use-package! symbol-overlay
   :config
