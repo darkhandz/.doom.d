@@ -89,6 +89,35 @@
                             (dk-lua-ts-safe-builtin-settings)
                           (list setting)))))
 
+;; Emacs 30.2 rejects the builtin keyword query shipped in `python-ts-mode`
+;; on this runtime. Replace only that feature with predicate-free rules plus a
+;; small Lisp-side matcher for `self`.
+(with-eval-after-load 'python
+  (defun dk-python-ts-fontify-self (node override start end &rest _)
+    "Fontify NODE as a Python keyword when it is the identifier `self'."
+    (let ((node-start (treesit-node-start node))
+          (node-end (treesit-node-end node)))
+      (when (and (>= node-start start)
+                 (<= node-end end)
+                 (string= (treesit-node-text node t) "self"))
+        (treesit-fontify-with-override
+         node-start node-end font-lock-keyword-face override))))
+
+  (defun dk-python-ts-safe-keyword-settings ()
+    "Return predicate-free keyword font-lock rules for `python-ts-mode'."
+    (treesit-font-lock-rules
+     :language 'python
+     :feature 'keyword
+     `([,@python--treesit-keywords] @font-lock-keyword-face
+       (identifier) @dk-python-ts-fontify-self)))
+
+  (setq python--treesit-settings
+        (cl-loop for setting in python--treesit-settings
+                 for feature = (nth 2 setting)
+                 append (if (eq feature 'keyword)
+                            (dk-python-ts-safe-keyword-settings)
+                          (list setting)))))
+
 (defun dk-c-so-long-keep-major-mode ()
   "Keep C-family major modes when `so-long' handles long lines."
   (setq-local so-long-action 'so-long-minor-mode)
