@@ -52,21 +52,81 @@
                   (throw 'found candidate)))))
           nil)))))
 
-(defun dk-load-cfg-file ()
-  "Silently load `.dark.el' from the project root or its first-level children."
-  (let* ((project-root (or (when (bound-and-true-p lsp-mode)
-                             (lsp-workspace-root))
-                           (doom-project-root)
-                           default-directory))
+(defvar dk-load-cfg-debug nil
+  "When non-nil, log `.dark.el' discovery/loading decisions.")
+
+(defun dk-load-cfg--log (format-string &rest args)
+  "Log FORMAT-STRING with ARGS when `dk-load-cfg-debug' is enabled."
+  (when dk-load-cfg-debug
+    (apply #'message (concat "[dk-load-cfg] " format-string) args)))
+
+(defun dk-toggle-load-cfg-debug ()
+  "Toggle debug logging for `dk-load-cfg-file'."
+  (interactive)
+  (setq dk-load-cfg-debug (not dk-load-cfg-debug))
+  (message "dk-load-cfg-debug: %s" (if dk-load-cfg-debug "on" "off")))
+
+(defun dk-load-cfg--workspace-project-root ()
+  "Return the project root recorded on the current workspace, if any."
+  (when (and (bound-and-true-p persp-mode)
+             (fboundp 'get-current-persp)
+             (fboundp 'persp-parameter))
+    (when-let* ((persp (get-current-persp))
+                (root (persp-parameter '+workspace-project persp))
+                ((file-directory-p root)))
+      root)))
+
+(defun dk-load-cfg--project-root ()
+  "Return the best project root to use for `.dark.el' loading."
+  (or (dk-load-cfg--workspace-project-root)
+      (and (bound-and-true-p lsp-mode)
+           (fboundp 'lsp-workspace-root)
+           (lsp-workspace-root))
+      (and (fboundp 'doom-project-root)
+           (doom-project-root))
+      (and (fboundp 'projectile-project-root)
+           (ignore-errors (projectile-project-root)))
+      default-directory))
+
+(defun dk-load-cfg-file (&optional project-root reason)
+  "Silently load `.dark.el' from PROJECT-ROOT or its first-level children.
+
+If PROJECT-ROOT is nil, infer it from the current workspace first, then from the
+current buffer/project."
+  (interactive)
+  (let* ((project-root (or project-root (dk-load-cfg--project-root)))
+         (project-root (and project-root (file-name-as-directory project-root)))
+         (workspace (when (fboundp '+workspace-current-name)
+                      (+workspace-current-name)))
          (dk-cfg-path (dk-find-project-file project-root ".dark.el")))
+    (dk-load-cfg--log "reason=%s workspace=%s buffer=%s root=%s cfg=%s"
+                      (or reason "manual")
+                      (or workspace "<none>")
+                      (buffer-name)
+                      (or project-root "<none>")
+                      (or dk-cfg-path "<not-found>"))
     (when (and dk-cfg-path (file-exists-p dk-cfg-path))
       (let ((inhibit-message t)
             (message-log-max nil))
-        (load dk-cfg-path nil 'nomessage 'nosuffix)))))
+        (load dk-cfg-path nil 'nomessage 'nosuffix))
+      (dk-load-cfg--log "loaded %s" dk-cfg-path))))
+
+(defun dk-load-cfg-schedule (&optional reason project-root delay)
+  "Schedule `.dark.el' loading for PROJECT-ROOT.
+
+REASON is used only for debug logging.  DELAY defaults to a short idle delay so
+workspace window/buffer restoration has time to settle."
+  (run-with-idle-timer
+   (or delay 0.3)
+   nil
+   #'dk-load-cfg-file
+   project-root
+   reason))
 
 (defun dk-load-cfg-after-workspace-created (&rest _args)
-  (run-with-timer 2 nil #'dk-load-cfg-file))
+  (dk-load-cfg-schedule "workspace-created" nil 2))
 
+(advice-remove #'+workspace-new #'dk-load-cfg-after-workspace-created)
 (advice-add #'+workspace-new :after #'dk-load-cfg-after-workspace-created)
 
 (defun dk-update-project-files-by-ignore ()
@@ -222,9 +282,27 @@
        :desc "Open .dark.el" "d" #'dk-open-project-dark))
 
 (defun dk-workspace-switch-hook (&rest _)
-  (run-with-idle-timer 0.3 nil #'dk-load-cfg-file))
+  (dk-load-cfg-schedule "workspace-activated"))
 
-(advice-add #'+workspace/switch-to :after #'dk-workspace-switch-hook)
+(advice-remove #'+workspace/switch-to #'dk-workspace-switch-hook)
+
+(after! persp-mode
+  (add-hook 'persp-activated-functions #'dk-workspace-switch-hook))
+
+(defun dk-workspace-project-switch-hook (&optional dir &rest _)
+  (let ((project-root (or (and dir (file-name-as-directory dir))
+                          (dk-load-cfg--project-root))))
+    (when (and project-root
+               (bound-and-true-p persp-mode)
+               (fboundp 'get-current-persp)
+               (fboundp 'set-persp-parameter))
+      (set-persp-parameter '+workspace-project project-root (get-current-persp)))
+    (dk-load-cfg-schedule "project-switch" project-root)))
+
+(advice-remove #'+workspaces-switch-to-project-h
+               #'dk-workspace-project-switch-hook)
+(advice-add #'+workspaces-switch-to-project-h :after
+            #'dk-workspace-project-switch-hook)
 
 (defun dk-projectile-find-file-all ()
   "Find any file in the current project, ignoring ignore rules."
