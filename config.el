@@ -9,4 +9,5 @@
 (load! "modules/navigation")
 (load! "modules/lsp")
 (load! "modules/project")
+(load! "modules/workspace-session-guard")
 (load! "modules/workflow")
