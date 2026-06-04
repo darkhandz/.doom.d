@@ -8,6 +8,27 @@
         lsp-lens-enable nil
         lsp-file-watch-threshold 5000))
 
+(defun dk/lsp-refresh-visible-breadcrumbs ()
+  "Refresh lsp-mode breadcrumbs in the visible windows."
+  (when (fboundp 'lsp-headerline-check-breadcrumb)
+    (dolist (window (window-list nil 'no-minibuf))
+      (when (window-live-p window)
+        (with-current-buffer (window-buffer window)
+          (when (bound-and-true-p lsp-headerline-breadcrumb-mode)
+            (with-selected-window window
+              (ignore-errors
+                (lsp-headerline-check-breadcrumb)))))))))
+
+(defun dk/lsp-refresh-breadcrumbs-after-workspace-switch (&rest _)
+  "Refresh lsp-mode breadcrumbs after the active workspace changes."
+  (run-at-time 0.05 nil #'dk/lsp-refresh-visible-breadcrumbs))
+
+(after! persp-mode
+  (remove-hook 'persp-activated-functions
+               #'dk/lsp-refresh-breadcrumbs-after-workspace-switch)
+  (add-hook 'persp-activated-functions
+            #'dk/lsp-refresh-breadcrumbs-after-workspace-switch))
+
 (defun dk/lsp-use-treesit-imenu-maybe ()
   "Prefer tree-sitter Imenu in tree-sitter major modes."
   (when-let ((fn (and (derived-mode-p 'c-ts-base-mode
