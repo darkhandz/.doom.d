@@ -199,6 +199,26 @@
      :desc "previous" "p" #'symbol-overlay-jump-prev
      :desc "rename" "R" #'symbol-overlay-query-replace))))
 
+(map! (:when (modulep! :editor multiple-cursors)
+       ;; Doom binds evil-multiedit to M-d by default, but macOS builds often
+       ;; report Command as Super, so provide both event families explicitly.
+       :n  "M-d"   #'evil-multiedit-match-symbol-and-next
+       :n  "M-D"   #'evil-multiedit-match-symbol-and-prev
+       :v  "M-d"   #'evil-multiedit-match-and-next
+       :v  "M-D"   #'evil-multiedit-match-and-prev
+       :nv "C-M-d" #'evil-multiedit-restore
+       :n  "s-d"   #'evil-multiedit-match-symbol-and-next
+       :n  "s-D"   #'evil-multiedit-match-symbol-and-prev
+       :v  "s-d"   #'evil-multiedit-match-and-next
+       :v  "s-D"   #'evil-multiedit-match-and-prev
+       :nv "C-s-d" #'evil-multiedit-restore
+       (:after evil-multiedit
+        (:map evil-multiedit-mode-map
+         :nv "M-d" #'evil-multiedit-match-and-next
+         :nv "M-D" #'evil-multiedit-match-and-prev
+         :nv "s-d" #'evil-multiedit-match-and-next
+         :nv "s-D" #'evil-multiedit-match-and-prev))))
+
 (after! evil
   (define-key evil-motion-state-map "j" #'evil-next-visual-line)
   (define-key evil-motion-state-map "k" #'evil-previous-visual-line)
